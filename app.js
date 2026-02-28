@@ -3,13 +3,45 @@
   const AUTH_ENTITIES = ['BAO','BOBA','BOCC','BOES','BOGA','BOGB','BOPO','BOVA','AOC'];
   const GROUP_ENTITIES = ['BOBA','BOCC','BOES','BOGA','BOGB','BOPO','BOVA','AOC'];
   const FN_BY_ENTITY = { BAO:'CEX', BOBA:'CDC', BOCC:'CDT', BOES:'CDR', BOGA:'PDM', BOGB:'PDA', BOPO:'PDE', BOVA:'PDM', AOC:'PDS' };
-  const COLLAB_FUNCS = ['CCO','CDC','CDT','CDR','PDM','PDA','PDE','PDS'];
+  const COLLAB_FUNCS = ['CCO','CDC','CDT','CDR','PDM','PDA','PDE','PDS','CEX'];
   const STORAGE = { user:'missaghji:user', history:'missaghji:history', counters:'missaghji:counters', settings:'missaghji:settings' };
 
   const $ = (id)=>document.getElementById(id);
   const views = { auth: $('view-auth'), app: $('view-app'), history: $('view-history') };
   const idBadge = $('idBadge');
   const ls = { get(k,d){ try{ return JSON.parse(localStorage.getItem(k)) ?? d }catch(e){ return d } }, set(k,v){ localStorage.setItem(k, JSON.stringify(v)) } };
+
+  // --- i18n ---
+  const i18n = {
+    fr: { identification:'Identification', authHint:'Entrez votre Nom et choisissez votre Entité.', valider:'Valider', installer:'Installer', installerHelp:'Installer ?', historique:'Historique', rafraichir:'Rafraîchir', changerEntite:'Changer entité', role:'Rôle', emetteur:'Émetteur', recepteur:'Récepteur', hh:'Heure (HH)', mm:'Minutes (MM)', actualiser:'Actualiser', numero:'N°', generer:'Générer', nom:'Nom', nomMaj:'Nom (MAJ)', fonction:'Fonction', entite:'Entité', message:'Message', enregistrer:'Enregistrer', retour:'Retour', exporter:'Exporter CSV', supprimerTout:'Supprimer tout', history:'Historique' },
+    co: { identification:'Identificazione', authHint:"Mettite u vostru Nome è sceglite l'Entità.", valider:'Validà', installer:'Installà', installerHelp:'Installà ?', historique:'Storicu', rafraichir:'Rinfrescà', changerEntite:"Cambià entità", role:'Rolu', emetteur:'Emettitore', recepteur:'Ricevitore', hh:'Ora (HH)', mm:'Minuti (MM)', actualiser:'Attualizà', numero:'N°', generer:'Generà', nom:'Nome', nomMaj:'Nome (MAI)', fonction:'Funzione', entite:'Entità', message:'Messaghju', enregistrer:'Arregistrà', retour:'Ritornu', exporter:'Esporta CSV', supprimerTout:'Sguassà tuttu', history:'Storicu' }
+  };
+  function t(){ const s=ls.get(STORAGE.settings,{lang:'fr'}); return i18n[s.lang||'fr']||i18n.fr; }
+  function setText(id,txt){ const el=$(id); if(el) el.textContent=txt; }
+  function applyLang(lang){ const L=i18n[lang]||i18n.fr;
+    setText('btnInstall',L.installer); setText('mInstall',L.installer);
+    setText('btnInstallHelp',L.installerHelp); setText('mInstallHelp',L.installerHelp);
+    setText('btnHistory',L.historique); setText('mHistory',L.historique);
+    setText('btnRefresh',L.rafraichir); setText('mRefresh',L.rafraichir);
+    setText('btnChangeEntity',L.changerEntite); setText('mChangeEntity',L.changerEntite);
+
+    setText('titleAuth',L.identification); setText('authHint',L.authHint);
+    setText('titleContext','Contexte');
+    setText('titleEmetteur',L.emetteur); setText('titleRecepteur',L.recepteur);
+    setText('titleMessage',L.message); setText('titleHistory',L.history||L.historique);
+
+    setText('labelAuthName',L.nom); setText('labelAuthEntity',L.entite);
+    setText('labelRole',L.role); setText('labelHH',L.hh); setText('labelMM',L.mm);
+    setText('labelEmNum',L.numero); setText('labelEmName',L.nom); setText('labelEmFunc',L.fonction); setText('labelEmEntity',L.entite);
+    setText('labelReNum',L.numero); setText('labelReName',L.nomMaj); setText('labelReFunc',L.fonction); setText('labelReEntity',L.entite);
+
+    setText('btnNow',L.actualiser); setText('btnSave',L.enregistrer); setText('authValidate',L.valider); setText('btnBack',L.retour); setText('btnExport',L.exporter); setText('btnClearAll',L.supprimerTout);
+
+    $('authName').placeholder=(lang==='co'?'U VOSTRU NOME (MAI)':'VOTRE NOM (MAJ)');
+    $('emName').placeholder=(lang==='co'?'NOME EMETTITORE (MAI)':'NOM ÉMETTEUR (MAJ)');
+    $('reName').placeholder=(lang==='co'?'NOME RICEVITORE (MAI)':'NOM RÉCEPTEUR (MAJ)');
+    $('message').placeholder=(lang==='co'?'Scrivite u vostru messaghju (illimitatu)':'Saisissez votre message (illimité)');
+  }
 
   // --- Router ---
   function showView(view){ Object.values(views).forEach(v=>v.classList.add('hidden')); if(view==='auth'){ document.body.classList.add('only-auth'); views.auth.classList.remove('hidden'); } else if(view==='app'){ document.body.classList.remove('only-auth'); views.app.classList.remove('hidden'); } else { document.body.classList.remove('only-auth'); views.history.classList.remove('hidden'); } }
@@ -39,8 +71,8 @@
 
   function refreshBadge(){ const user=ls.get(STORAGE.user,null); if(!user){ idBadge.textContent=''; return; } idBadge.textContent = user.name + ' · ' + user.entity; }
 
-  function loadSettings(){ const s=ls.get(STORAGE.settings,{lang:'fr',role:'emetteur'}); $('langSelect').value=s.lang||'fr'; $('mLangSelect').value=s.lang||'fr'; roleSelect.value=s.role||'emetteur'; }
-  function saveSettings(){ const s=ls.get(STORAGE.settings,{}); s.lang=$('langSelect').value; s.role=roleSelect.value; ls.set(STORAGE.settings,s); $('mLangSelect').value=s.lang; }
+  function loadSettings(){ const s=ls.get(STORAGE.settings,{lang:'fr',role:'emetteur'}); $('langSelect').value=s.lang||'fr'; $('mLangSelect').value=s.lang||'fr'; roleSelect.value=s.role||'emetteur'; applyLang(s.lang||'fr'); }
+  function saveSettings(){ const s=ls.get(STORAGE.settings,{}); s.lang=$('langSelect').value; s.role=roleSelect.value; ls.set(STORAGE.settings,s); applyLang(s.lang); $('mLangSelect').value=s.lang; }
   $('langSelect').addEventListener('change', saveSettings); $('mLangSelect').addEventListener('change', ()=>{ $('langSelect').value=$('mLangSelect').value; saveSettings(); });
 
   function prepareApp(){ const user=ls.get(STORAGE.user,null); if(!user) return; loadSettings(); setNow(); configureByRole(); }
@@ -57,8 +89,8 @@
       emName.value=user.name.toUpperCase(); emFunc.value=ownFunc; emFunc.readOnly=true; setOptions(emEntity,[user.entity]); emEntity.disabled=true;
       // Collaborateur = Récepteur
       reName.value=''; reFunc.value='';
-      // SELECT pour la fonction du collaborateur
       setOptions(reFuncSel, COLLAB_FUNCS); hideEl(reFunc); showEl(reFuncSel);
+      // entités par défaut côté collaborateur (si toi=BAO => groupe, sinon BAO)
       if(user.entity==='BAO'){ setOptions(reEntity, GROUP_ENTITIES); reEntity.disabled=false; }
       else { setOptions(reEntity, ['BAO']); reEntity.value='BAO'; reEntity.disabled=true; }
       emGen.style.display='inline-block'; reGen.style.display='none';
@@ -84,9 +116,12 @@
     if(user.entity==='BAO'){
       if(f==='CCO'){ setOptions(entitySelect, ['DELCO']); entitySelect.value='DELCO'; entitySelect.disabled=true; }
       else if(['CDC','CDT','CDR','PDM','PDA','PDE','PDS'].includes(f)){ setOptions(entitySelect, GROUP_ENTITIES); entitySelect.disabled=false; }
+      else if(f==='CEX'){ setOptions(entitySelect, ['BAO']); entitySelect.value='BAO'; entitySelect.disabled=true; }
       else { setOptions(entitySelect, GROUP_ENTITIES); entitySelect.disabled=false; }
     } else {
+      // Toi ≠ BAO
       if(f==='CCO'){ setOptions(entitySelect, ['DELCO']); entitySelect.value='DELCO'; entitySelect.disabled=true; }
+      else if(f==='CEX'){ setOptions(entitySelect, ['BAO']); entitySelect.value='BAO'; entitySelect.disabled=true; }
       else { setOptions(entitySelect, ['BAO']); entitySelect.value='BAO'; entitySelect.disabled=true; }
     }
   }
@@ -122,7 +157,7 @@
     if(!rec.message){ alert('Message vide'); return; }
     if(!rec.emName || !rec.reName){ alert('Nom émetteur et nom récepteur requis'); return; }
     const hist=getHistory(); hist.push(rec); setHistory(hist);
-    const hint=$('saveHint'); hint.textContent='Enregistré'; setTimeout(()=>hint.textContent='',1200);
+    const hint=$('saveHint'); hint.textContent=t().enregistrer+' ✓'; setTimeout(()=>hint.textContent='',1200);
     doRefresh(); // refresh after save
   });
 
@@ -138,5 +173,5 @@
   function promptInstall(){ if(!deferredPrompt) return; deferredPrompt.prompt(); deferredPrompt.userChoice.finally(()=>{ deferredPrompt=null; $('btnInstall').classList.add('hidden'); $('mInstall').classList.add('hidden'); }); }
   $('btnInstall').addEventListener('click', ()=>{ promptInstall(); }); $('mInstall').addEventListener('click', ()=>{ closeMenu(); promptInstall(); });
 
-  document.addEventListener('DOMContentLoaded', ()=>{ fillAuth(); const user=ls.get(STORAGE.user,null); if(user){ authName.value=user.name; authEntity.value=user.entity; } route(); });
+  document.addEventListener('DOMContentLoaded', ()=>{ fillAuth(); const s=ls.get(STORAGE.settings,{lang:'fr',role:'emetteur'}); applyLang(s.lang||'fr'); const user=ls.get(STORAGE.user,null); if(user){ authName.value=user.name; authEntity.value=user.entity; } route(); });
 })();
