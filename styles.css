@@ -32,7 +32,7 @@ header.appbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;j
 }
 label{font-weight:600}
 input, select, textarea{width:100%;padding:.55rem .6rem;border:1px solid var(--border);border-radius:10px;background:#fff}
-input[readonly]{background:#f9fafb}
+input[readonly], select:disabled{background:#f9fafb}
 textarea{min-height:120px}
 .btn{background:var(--orange);color:#fff;border:0;border-radius:10px;padding:.6rem .8rem;cursor:pointer}
 .btn.secondary{background:var(--black)}

@@ -59,15 +59,14 @@
     <section id="view-auth" class="card">
       <h2 id="titleAuth">Identification</h2>
       <p class="small" id="authHint">Entrez votre <strong>Nom</strong> et choisissez votre <strong>Entité</strong>.</p>
-      <div class="grid">
-        <div>
-          <label for="authName" id="labelAuthName">Nom</label>
-          <input id="authName" autocomplete="name" placeholder="VOTRE NOM (MAJ)" />
-        </div>
-        <div>
-          <label for="authEntity" id="labelAuthEntity">Entité</label>
-          <select id="authEntity"></select>
-        </div>
+      <!-- Stacked layout: Entité SOUS Nom, même sur desktop -->
+      <div>
+        <label for="authName" id="labelAuthName">Nom</label>
+        <input id="authName" autocomplete="name" placeholder="VOTRE NOM (MAJ)" />
+      </div>
+      <div style="margin-top:12px">
+        <label for="authEntity" id="labelAuthEntity">Entité</label>
+        <select id="authEntity"></select>
       </div>
       <div class="row" style="margin-top:12px">
         <button class="btn" id="authValidate">Valider</button>
@@ -127,7 +126,8 @@
             </div>
             <div>
               <label for="emEntity" id="labelEmEntity">Entité</label>
-              <input id="emEntity" readonly />
+              <!-- dev: become select to allow counterpart selection when role=recepteur -->
+              <select id="emEntity"></select>
             </div>
           </div>
         </div>
@@ -135,11 +135,17 @@
         <!-- RÉCEPTEUR -->
         <div class="card">
           <h3 id="titleRecepteur">Récepteur</h3>
-          <div class="grid">
-            <div>
+          <div class="row">
+            <div style="flex:1">
               <label for="reNum" id="labelReNum">N°</label>
               <input id="reNum" inputmode="numeric" placeholder="Numéro" />
             </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn" id="reGen">Générer</button>
+            </div>
+          </div>
+          <div class="grid">
             <div>
               <label for="reName" id="labelReName">Nom (MAJ)</label>
               <input id="reName" placeholder="NOM RÉCEPTEUR (MAJ)" />
@@ -157,11 +163,16 @@
       </div>
 
       <datalist id="funcList">
-        <option value="Chef de salle"></option>
-        <option value="Opérateur"></option>
-        <option value="Superviseur"></option>
-        <option value="Agent"></option>
-        <option value="Technicien"></option>
+        <option value="CDC"></option>
+        <option value="CDT"></option>
+        <option value="CDR"></option>
+        <option value="PDM"></option>
+        <option value="PDA"></option>
+        <option value="PDE"></option>
+        <option value="PDS"></option>
+        <option value="CEX"></option>
+        <option value="CCO"></option>
+        <option value="AGENT"></option>
       </datalist>
 
       <div class="card">

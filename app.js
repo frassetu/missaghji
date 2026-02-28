@@ -2,6 +2,7 @@
 (function(){
   // --- Constants
   const AUTH_ENTITIES = ['BAO','BOBA','BOCC','BOES','BOGA','BOGB','BOPO','BOVA','AOC'];
+  const FN_BY_ENTITY = { BAO:'CEX', BOBA:'CDC', BOCC:'CDT', BOES:'CDR', BOGA:'PDM', BOGB:'PDA', BOPO:'PDE', BOVA:'PDM', AOC:'PDS' };
   const STORAGE = { user:'missaghji:user', history:'missaghji:history', counters:'missaghji:counters', settings:'missaghji:settings' };
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
@@ -20,30 +21,25 @@
 
   function applyLang(lang){
     const t = i18n[lang] || i18n.fr;
-    // App bar buttons (both inline and dropdown)
     setText('btnInstall', t.installer); setText('mInstall', t.installer);
     setText('btnInstallHelp', t.installerHelp); setText('mInstallHelp', t.installerHelp);
     setText('btnHistory', t.historique); setText('mHistory', t.historique);
     setText('btnRefresh', t.rafraichir); setText('mRefresh', t.rafraichir);
     setText('btnChangeEntity', t.changerEntite); setText('mChangeEntity', t.changerEntite);
 
-    // Titles
     setText('titleAuth', t.identification); setText('authHint', t.authHint);
     setText('titleContext', 'Contexte');
     setText('titleEmetteur', t.emetteur); setText('titleRecepteur', t.recepteur);
     setText('titleMessage', t.message); setText('titleHistory', t.history || t.historique);
 
-    // Labels
     setText('labelAuthName', t.nom); setText('labelAuthEntity', t.entite);
     setText('labelRole', t.role); setText('labelHH', t.hh); setText('labelMM', t.mm);
     setText('labelEmNum', t.numero); setText('labelEmName', t.nom); setText('labelEmFunc', t.fonction); setText('labelEmEntity', t.entite);
     setText('labelReNum', t.numero); setText('labelReName', t.nomMaj); setText('labelReFunc', t.fonction); setText('labelReEntity', t.entite);
 
-    // Buttons inside cards
-    setText('btnNow', t.actualiser); setText('emGen', t.generer); setText('btnSave', t.enregistrer);
+    setText('btnNow', t.actualiser); setText('emGen', t.generer); setText('reGen', t.generer); setText('btnSave', t.enregistrer);
     setText('authValidate', t.valider); setText('btnBack', t.retour); setText('btnExport', t.exporter); setText('btnClearAll', t.supprimerTout);
 
-    // Placeholders
     $('authName').placeholder = (lang==='co' ? 'U VOSTRU NOME (MAI)' : 'VOTRE NOM (MAJ)');
     $('emName').placeholder = (lang==='co' ? 'NOME EMETTITORE (MAI)' : 'NOM ÉMETTEUR (MAJ)');
     $('reName').placeholder = (lang==='co' ? 'NOME RICEVITORE (MAI)' : 'NOM RÉCEPTEUR (MAJ)');
@@ -60,18 +56,13 @@
   });
   function promptInstall(){ if(!deferredPrompt) return; deferredPrompt.prompt(); deferredPrompt.userChoice.finally(()=>{ deferredPrompt=null; $('btnInstall').classList.add('hidden'); $('mInstall').classList.add('hidden'); }); }
   function showInstallHelp(){
-    if(isIOS){
-      alert("Sur iPhone/iPad : bouton Partager ▸ Ajouter à l'écran d'accueil.");
-    } else {
-      alert("Sur Android : menu ⋮ ▸ Ajouter à l'écran d'accueil, ou utilisez le bouton Installer quand il apparaît.");
-    }
+    if(isIOS){ alert("Sur iPhone/iPad : bouton Partager ▸ Ajouter à l'écran d'accueil."); }
+    else { alert("Sur Android : menu ⋮ ▸ Ajouter à l'écran d'accueil, ou utilisez le bouton Installer quand il apparaît."); }
   }
 
-  // --- Populate auth entities after DOM ready
-  function fillAuthEntities(){
-    const sel = $('authEntity'); sel.innerHTML='';
-    AUTH_ENTITIES.forEach(e=>{ const o=document.createElement('option'); o.value=e; o.textContent=e; sel.appendChild(o); });
-  }
+  // --- Populate selects
+  function setOptions(select, list){ select.innerHTML=''; list.forEach(v=>{ const o=document.createElement('option'); o.value=v; o.textContent=v; select.appendChild(o); }); }
+  function fillAuthEntities(){ setOptions($('authEntity'), AUTH_ENTITIES); }
 
   // --- Router
   function show(view){ Object.values(views).forEach(v=>v.classList.add('hidden')); if(view==='auth'){ document.body.classList.add('only-auth'); views.auth.classList.remove('hidden'); } else if(view==='app'){ document.body.classList.remove('only-auth'); views.app.classList.remove('hidden'); } else { document.body.classList.remove('only-auth'); views.history.classList.remove('hidden'); } }
@@ -91,7 +82,7 @@
   // --- App prep
   const roleSelect=$('roleSelect'); const hh=$('hh'); const mm=$('mm');
   const emNum=$('emNum'), emGen=$('emGen'), emName=$('emName'), emFunc=$('emFunc'), emEntity=$('emEntity');
-  const reNum=$('reNum'), reName=$('reName'), reFunc=$('reFunc'), reEntity=$('reEntity');
+  const reNum=$('reNum'), reGen=$('reGen'), reName=$('reName'), reFunc=$('reFunc'), reEntity=$('reEntity');
   const message=$('message');
 
   function zero2(n){ return (n<10?'0':'')+n }
@@ -104,7 +95,7 @@
   function refreshBadge(){ const user=ls.get(STORAGE.user,null); if(!user){ idBadge.textContent=''; return; } idBadge.textContent = user.name + ' · ' + user.entity; }
 
   function counterpartEntities(userEntity){ if(userEntity==='BAO') return ['DELCO','BOBA','BOCC','BOES','BOGA','BOGB','BOPO','BOVA','AOC']; const group=new Set(['BOBA','BOCC','BOES','BOGA','BOGB','BOPO','BOVA','AOC']); if(group.has(userEntity)) return ['BAO','DELCO']; return ['BAO','DELCO']; }
-  function fillCounterpartSelect(){ const user=ls.get(STORAGE.user,null); const opts=counterpartEntities(user.entity); reEntity.innerHTML=''; opts.forEach(e=>{ const o=document.createElement('option'); o.value=e; o.textContent=e; reEntity.appendChild(o); }); }
+  function fillCounterpartSelects(){ const user=ls.get(STORAGE.user,null); const opts=counterpartEntities(user.entity); setOptions(reEntity, opts); setOptions(emEntity, opts); }
 
   function loadSettings(){ const s=ls.get(STORAGE.settings,{lang:'fr',role:'emetteur'}); $('langSelect').value=s.lang||'fr'; $('mLangSelect').value=s.lang||'fr'; roleSelect.value=s.role||'emetteur'; applyLang(s.lang||'fr'); }
   function saveSettings(){ const s=ls.get(STORAGE.settings,{}); s.lang=$('langSelect').value; s.role=roleSelect.value; ls.set(STORAGE.settings,s); applyLang(s.lang); $('mLangSelect').value=s.lang; }
@@ -112,9 +103,34 @@
   $('langSelect').addEventListener('change', saveSettings);
   $('mLangSelect').addEventListener('change', ()=>{ $('langSelect').value=$('mLangSelect').value; saveSettings(); });
 
-  function prepareApp(){ const user=ls.get(STORAGE.user,null); if(!user) return; loadSettings(); setNow(); fillCounterpartSelect(); if(!reEntity.options || reEntity.options.length===0) setTimeout(fillCounterpartSelect,0); configureByRole(); }
+  function prepareApp(){ const user=ls.get(STORAGE.user,null); if(!user) return; loadSettings(); setNow(); fillCounterpartSelects(); configureByRole(); }
 
-  function configureByRole(){ const user=ls.get(STORAGE.user,null); const role=roleSelect.value; if(role==='emetteur'){ emName.value=user.name; emEntity.value=user.entity; emName.readOnly=true; emEntity.readOnly=true; reName.readOnly=false; } else { reName.value=user.name.toUpperCase(); const opts=counterpartEntities(user.entity); reEntity.value=opts[0]; reName.readOnly=true; emName.readOnly=false; }
+  function configureByRole(){
+    const user=ls.get(STORAGE.user,null); if(!user) return; const role=roleSelect.value; const ownFunc = FN_BY_ENTITY[user.entity] || '';
+    // Reset enables
+    [emFunc,reFunc].forEach(i=>i.readOnly=false);
+    [emEntity,reEntity].forEach(s=>s.disabled=false);
+
+    if(role==='emetteur'){
+      // Own info in Émetteur block
+      emName.value=user.name.toUpperCase(); emFunc.value=ownFunc; emFunc.readOnly=true; emEntity.disabled=true; emEntity.innerHTML='';
+      // Counterpart selectable in Récepteur
+      setOptions(reEntity, counterpartEntities(user.entity));
+      // Generator visibility
+      emGen.style.display='inline-block'; reGen.style.display='none';
+      // Receiver name editable (counterpart)
+      reName.readOnly=false;
+    } else {
+      // Own info in Récepteur block
+      reName.value=user.name.toUpperCase(); reFunc.value=ownFunc; reFunc.readOnly=true; setOptions(reEntity, [user.entity]); reEntity.disabled=true;
+      // Counterpart selectable in Émetteur
+      setOptions(emEntity, counterpartEntities(user.entity)); emEntity.disabled=false;
+      // Generator visibility
+      emGen.style.display='none'; reGen.style.display='inline-block';
+      // Emitter name editable (counterpart)
+      emName.readOnly=false;
+    }
+    applyCCORule();
   }
   roleSelect.addEventListener('change', ()=>{ saveSettings(); configureByRole(); });
 
@@ -122,15 +138,19 @@
   function saveCounters(c){ ls.set(STORAGE.counters,c); }
   function nextNumberFor(entity, role){ const c=loadCounters(); if(!c[entity]) c[entity]={ emetteur:1, recepteur:1 }; const n=c[entity][role]; c[entity][role]=Math.min(999,(n||1))+1; saveCounters(c); return n||1; }
 
-  $('emGen').addEventListener('click', ()=>{ const user=ls.get(STORAGE.user,null); if(!user) return; const role=roleSelect.value; const n=nextNumberFor(user.entity, role); if(role==='emetteur') emNum.value=n; else reNum.value=n; });
+  // Generators now per block
+  emGen.addEventListener('click', ()=>{ const user=ls.get(STORAGE.user,null); if(!user) return; if(roleSelect.value!=='emetteur'){ alert('Le générateur actif est côté Récepteur'); return; } const n=nextNumberFor(user.entity,'emetteur'); emNum.value=n; });
+  reGen.addEventListener('click', ()=>{ const user=ls.get(STORAGE.user,null); if(!user) return; if(roleSelect.value!=='recepteur'){ alert('Le générateur actif est côté Émetteur'); return; } const n=nextNumberFor(user.entity,'recepteur'); reNum.value=n; });
 
-  $('btnRefresh').addEventListener('click', ()=>{ doRefresh(); });
+  // Rafraîchir
+  function doRefresh(){ roleSelect.value='emetteur'; hh.value=mm.value=''; emNum.value=emName.value=emFunc.value=''; reNum.value=reName.value=reFunc.value=''; message.value=''; const user=ls.get(STORAGE.user,null); if(user){ emName.value=user.name.toUpperCase(); } fillCounterpartSelects(); configureByRole(); setNow(); saveSettings(); }
+  $('btnRefresh').addEventListener('click', doRefresh);
   $('mRefresh').addEventListener('click', ()=>{ closeMenu(); doRefresh(); });
-  function doRefresh(){ roleSelect.value='emetteur'; hh.value=mm.value=''; emNum.value=emName.value=emFunc.value=''; reNum.value=reName.value=reFunc.value=''; message.value=''; const user=ls.get(STORAGE.user,null); if(user){ emName.value=user.name; emEntity.value=user.entity; } fillCounterpartSelect(); setNow(); saveSettings(); }
 
-  $('btnChangeEntity').addEventListener('click', ()=>{ changeEntity(); });
+  // Changer entité
+  function changeEntity(){ const user=ls.get(STORAGE.user,null); if(!user){ location.hash='#/auth'; return; } $('authName').value=user.name; $('authEntity').value=user.entity; location.hash='#/auth'; setTimeout(()=>{ window.scrollTo(0,0); $('authEntity').focus(); }, 0); }
+  $('btnChangeEntity').addEventListener('click', changeEntity);
   $('mChangeEntity').addEventListener('click', ()=>{ closeMenu(); changeEntity(); });
-  function changeEntity(){ const user=ls.get(STORAGE.user,null); if(!user){ location.hash='#/auth'; return; } $('authName').value=user.name; $('authEntity').value=user.entity; location.hash='#/auth'; }
 
   // History
   function getHistory(){ return ls.get(STORAGE.history,[]); }
@@ -149,12 +169,22 @@
   $('btnSave').addEventListener('click', ()=>{
     const user=ls.get(STORAGE.user,null); if(!user){ alert("Identifiez-vous d'abord"); location.hash='#/auth'; return; }
     const time=`${(hh.value||'').padStart(2,'0')}:${(mm.value||'').padStart(2,'0')}`;
-    const rec={ time, emNum:(emNum.value||'').trim(), emName:(emName.value||'').trim().toUpperCase(), emFunc:(emFunc.value||'').trim(), emEntity:(emEntity.value||user.entity), reNum:(reNum.value||'').trim(), reName:(reName.value||'').trim().toUpperCase(), reFunc:(reFunc.value||'').trim(), reEntity:reEntity.value, message:(message.value||'').trim() };
+    const rec={ time, emNum:(emNum.value||'').trim(), emName:(emName.value||'').trim().toUpperCase(), emFunc:(emFunc.value||'').trim(), emEntity: emEntity.disabled ? (ls.get(STORAGE.user,null)||{}).entity : emEntity.value, reNum:(reNum.value||'').trim(), reName:(reName.value||'').trim().toUpperCase(), reFunc:(reFunc.value||'').trim(), reEntity: reEntity.value, message:(message.value||'').trim() };
     if(!rec.message){ alert('Message vide'); return; }
     if(!rec.emName || !rec.reName){ alert('Nom émetteur et nom récepteur requis'); return; }
     const hist=getHistory(); hist.push(rec); setHistory(hist);
     const hint=$('saveHint'); hint.textContent='Enregistré'; setTimeout(()=>hint.textContent='',1500);
   });
+
+  // CCO rule: if counterpart function == 'CCO' => counterpart entity forced to 'DELCO' (disabled)
+  function applyCCORule(){ const role=roleSelect.value; if(role==='emetteur'){ // counterpart is receiver
+      if(reFunc.value.trim().toUpperCase()==='CCO'){ reEntity.value='DELCO'; reEntity.disabled=true; } else { reEntity.disabled=false; }
+    } else { // counterpart is emitter
+      if(emFunc.value.trim().toUpperCase()==='CCO'){ emEntity.value='DELCO'; emEntity.disabled=true; } else { emEntity.disabled=false; }
+    }
+  }
+  reFunc.addEventListener('input', applyCCORule);
+  emFunc.addEventListener('input', applyCCORule);
 
   // --- Menu burger behaviour
   const menuWrap=$('menuWrap'); const btnMenu=$('btnMenu');
@@ -170,16 +200,9 @@
 
   // --- Init after DOM ready
   document.addEventListener('DOMContentLoaded', ()=>{
-    // Fill auth select and apply language
     fillAuthEntities();
     const s=ls.get(STORAGE.settings,{lang:'fr',role:'emetteur'}); applyLang(s.lang||'fr');
-
-    // Prefill from storage
     const user=ls.get(STORAGE.user,null); if(user){ $('authName').value=user.name; $('authEntity').value=user.entity; }
-
-    // If beforeinstallprompt never fires, keep Install Help visible
-    if(!isIOS){ $('btnInstallHelp').classList.remove('hidden'); } else { $('btnInstallHelp').classList.remove('hidden'); }
-
     route();
   });
 })();
