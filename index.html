@@ -1,0 +1,181 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Missaghji</title>
+  <meta name="theme-color" content="#f97316" />
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(console.error);
+      });
+    }
+  </script>
+  <style> .only-auth header.appbar{display:none} </style>
+</head>
+<body>
+  <header class="appbar" id="appbar">
+    <div class="title">
+      <img src="icons/icon-192.png" alt="logo"/>
+      <strong>Missaghji</strong>
+      <span class="badge" id="idBadge"></span>
+    </div>
+    <div class="menu">
+      <button id="btnInstall" class="hidden">Installer</button>
+      <button id="btnHistory">Historique</button>
+      <button id="btnRefresh" class="ghost">Rafraîchir</button>
+      <button id="btnChangeEntity" class="secondary">Changer entité</button>
+      <select id="langSelect" title="Langue">
+        <option value="fr" selected>FR</option>
+        <option value="co">CO</option>
+      </select>
+    </div>
+  </header>
+
+  <main class="container">
+    <section id="view-auth" class="card">
+      <h2>Identification</h2>
+      <p class="small">Entrez votre <strong>Nom</strong> et choisissez votre <strong>Entité</strong>.</p>
+      <div class="grid">
+        <div>
+          <label for="authName">Nom</label>
+          <input id="authName" autocomplete="name" placeholder="Votre nom" />
+        </div>
+        <div>
+          <label for="authEntity">Entité</label>
+          <select id="authEntity"></select>
+        </div>
+      </div>
+      <div class="row" style="margin-top:12px"> <button class="btn" id="authValidate">Valider</button> </div>
+    </section>
+
+    <section id="view-app" class="hidden">
+      <div class="card">
+        <h2>Contexte</h2>
+        <div class="grid">
+          <div>
+            <label for="roleSelect">Rôle</label>
+            <select id="roleSelect">
+              <option value="emetteur">Émetteur</option>
+              <option value="recepteur">Récepteur</option>
+            </select>
+          </div>
+          <div class="row">
+            <div style="min-width:100px;flex:1">
+              <label for="hh">Heure (HH)</label>
+              <input id="hh" inputmode="numeric" maxlength="2" placeholder="HH" />
+            </div>
+            <div style="min-width:100px;flex:1">
+              <label for="mm">Minutes (MM)</label>
+              <input id="mm" inputmode="numeric" maxlength="2" placeholder="MM" />
+            </div>
+            <div style="align-self:flex-end">
+              <button class="btn" id="btnNow">Actualiser</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h3>Émetteur</h3>
+          <div class="row">
+            <div style="flex:1">
+              <label for="emNum">N°</label>
+              <input id="emNum" inputmode="numeric" placeholder="1 → 999" />
+            </div>
+            <div>
+              <label>&nbsp;</label>
+              <button class="btn" id="emGen">Générer</button>
+            </div>
+          </div>
+          <div class="grid">
+            <div>
+              <label for="emName">Nom</label>
+              <input id="emName" placeholder="Nom émetteur" />
+            </div>
+            <div>
+              <label for="emFunc">Fonction</label>
+              <input id="emFunc" list="funcList" placeholder="Fonction" />
+            </div>
+            <div>
+              <label for="emEntity">Entité</label>
+              <input id="emEntity" readonly />
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Récepteur</h3>
+          <div class="grid">
+            <div>
+              <label for="reNum">N°</label>
+              <input id="reNum" inputmode="numeric" placeholder="Numéro" />
+            </div>
+            <div>
+              <label for="reName">Nom (MAJ)</label>
+              <input id="reName" placeholder="Nom récepteur" />
+            </div>
+            <div>
+              <label for="reFunc">Fonction</label>
+              <input id="reFunc" list="funcList" placeholder="Fonction" />
+            </div>
+            <div>
+              <label for="reEntity">Entité</label>
+              <select id="reEntity"></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <datalist id="funcList">
+        <option value="Chef de salle"></option>
+        <option value="Opérateur"></option>
+        <option value="Superviseur"></option>
+        <option value="Agent"></option>
+        <option value="Technicien"></option>
+      </datalist>
+
+      <div class="card">
+        <h3>Message</h3>
+        <textarea id="message" placeholder="Saisissez votre message (illimité)"></textarea>
+        <div class="row" style="margin-top:12px">
+          <button class="btn" id="btnSave">Enregistrer</button>
+          <span class="small" id="saveHint"></span>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-history" class="hidden">
+      <div class="card">
+        <h2>Historique</h2>
+        <div class="row">
+          <button class="btn" id="btnBack">Retour</button>
+          <button class="btn secondary" id="btnExport">Exporter CSV</button>
+          <button class="btn ghost" id="btnClearAll">Supprimer tout</button>
+        </div>
+        <div style="overflow:auto;margin-top:10px">
+          <table class="table" id="historyTable">
+            <thead>
+              <tr>
+                <th>Heure</th>
+                <th>N° Émetteur</th><th>Nom Émetteur</th><th>Fonction Émetteur</th><th>Entité Émetteur</th>
+                <th>N° Récepteur</th><th>Nom Récepteur</th><th>Fonction Récepteur</th><th>Entité Récepteur</th>
+                <th>Message</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

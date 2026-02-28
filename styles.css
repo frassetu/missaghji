@@ -1,0 +1,34 @@
+
+:root{
+  --orange:#f97316; /* orange */
+  --black:#111827;  /* gris très foncé */
+  --bg:#ffffff;
+  --muted:#6b7280;
+  --border:#e5e7eb;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;background:var(--bg);color:var(--black)}
+header.appbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;padding:.6rem .9rem;background:#fff;border-bottom:1px solid var(--border)}
+.appbar .title{display:flex;gap:.6rem;align-items:center}
+.appbar .title img{width:28px;height:28px;border-radius:6px}
+.menu{display:flex;gap:.4rem;align-items:center}
+.menu button, .menu a{background:var(--orange);color:#fff;border:0;border-radius:10px;padding:.45rem .7rem;cursor:pointer}
+.menu select{padding:.35rem .45rem;border:1px solid var(--border);border-radius:8px}
+.container{max-width:980px;margin:0 auto;padding:1rem}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;margin:.8rem 0}
+.row{display:flex;gap:.6rem;align-items:center;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+label{font-weight:600}
+input, select, textarea{width:100%;padding:.55rem .6rem;border:1px solid var(--border);border-radius:10px;background:#fff}
+input[readonly]{background:#f9fafb}
+textarea{min-height:120px}
+.btn{background:var(--orange);color:#fff;border:0;border-radius:10px;padding:.6rem .8rem;cursor:pointer}
+.btn.secondary{background:var(--black)}
+.btn.ghost{background:transparent;color:var(--black);border:1px solid var(--border)}
+.small{font-size:.9rem;color:var(--muted)}
+.hidden{display:none}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{border-bottom:1px solid var(--border);padding:.5rem;text-align:left}
+.badge{display:inline-block;background:#fef3c7;color:#92400e;border:1px solid #f59e0b;padding:.15rem .4rem;border-radius:999px;font-size:.8rem}
+.center{display:flex;align-items:center;justify-content:center}
