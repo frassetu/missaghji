@@ -33,3 +33,13 @@ textarea{min-height:120px}
 .table th,.table td{border-bottom:1px solid var(--border);padding:.5rem;text-align:left}
 .badge{display:inline-block;background:#fef3c7;color:#92400e;border:1px solid #f59e0b;padding:.15rem .4rem;border-radius:999px;font-size:.8rem}
 .center{display:flex;align-items:center;justify-content:center}
+
+/* --- Compact rows on mobile --- */
+.row-compact{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row-compact-3{display:grid;grid-template-columns:1fr auto;gap:10px}
+@media(min-width:641px){ .row-compact{grid-template-columns:1fr 1fr} .row-compact-3{grid-template-columns:1fr auto} }
+
+/* tiny icon button */
+.iconbtn{background:var(--black);padding:.45rem .55rem;border-radius:10px}
+.iconbtn span{display:inline-block;transform:rotate(0deg);transition:transform .25s ease}
+.iconbtn:active span{transform:rotate(180deg)}
