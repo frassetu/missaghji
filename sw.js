@@ -1,21 +1,6 @@
 
-const CACHE_NAME='missaghji-cache-v3';
-const CORE_ASSETS=[
-  'index.html','styles.css','app.js','offline.html','manifest.webmanifest',
-  'icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png'
-];
+const CACHE_NAME='missaghji-cache-v3_1';
+const CORE_ASSETS=['index.html','styles.css','app.js','offline.html','manifest.webmanifest','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE_NAME).then(c=>c.addAll(CORE_ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))));self.clients.claim()});
-self.addEventListener('fetch',e=>{
-  const req=e.request;
-  if(req.mode==='navigate'){
-    e.respondWith((async()=>{try{return await fetch(req)}catch{const c=await caches.open(CACHE_NAME);return (await c.match('offline.html'))||new Response('Offline',{status:503})}})());
-    return;
-  }
-  const dest=req.destination;
-  if(['style','script','image','font'].includes(dest)){
-    e.respondWith((async()=>{const c=await caches.open(CACHE_NAME);const cached=await c.match(req,{ignoreSearch:true});const net=fetch(req).then(res=>{c.put(req,res.clone());return res}).catch(()=>null);return cached||net||new Response(null,{status:504})})());
-    return;
-  }
-  e.respondWith(caches.match(req,{ignoreSearch:true}).then(c=>c||fetch(req).catch(()=>null)));
-});
+self.addEventListener('fetch',e=>{const req=e.request; if(req.mode==='navigate'){e.respondWith((async()=>{try{return await fetch(req)}catch{const c=await caches.open(CACHE_NAME);return (await c.match('offline.html'))||new Response('Offline',{status:503})}})());return} const dest=req.destination; if(['style','script','image','font'].includes(dest)){e.respondWith((async()=>{const c=await caches.open(CACHE_NAME);const cached=await c.match(req,{ignoreSearch:true});const net=fetch(req).then(res=>{c.put(req,res.clone());return res}).catch(()=>null);return cached||net||new Response(null,{status:504})})());return} e.respondWith(caches.match(req,{ignoreSearch:true}).then(c=>c||fetch(req).catch(()=>null)));});
