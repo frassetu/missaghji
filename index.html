@@ -101,78 +101,56 @@
       <div class="grid">
         <!-- ÉMETTEUR -->
         <div class="card">
-          <h3 id="titleEmetteur">Émetteur</h3>
+          <h3>Émetteur</h3>
           <div class="row-compact-3">
             <div>
-              <label for="emNum" id="labelEmNum">N°</label>
+              <label for="emNum">N°</label>
               <input id="emNum" inputmode="numeric" placeholder="1 → 999" />
             </div>
             <div style="align-self:end">
               <button class="btn iconbtn" id="emGen" title="Générer"><span>↻</span></button>
             </div>
             <div>
-              <label for="emName" id="labelEmName">Nom</label>
+              <label for="emName">Nom</label>
               <input id="emName" placeholder="NOM ÉMETTEUR (MAJ)" required />
             </div>
           </div>
           <div class="row-compact">
             <div>
-              <label for="emFuncOwn" id="labelEmFunc">Fonction</label>
-              <select id="emFuncOwn" disabled></select>
+              <label for="emFunc">Fonction</label>
+              <select id="emFunc" disabled></select>
             </div>
             <div>
-              <label for="emEntityOwn" id="labelEmEntity">Entité</label>
-              <select id="emEntityOwn" disabled></select>
-            </div>
-          </div>
-          <!-- Collaborateur si rôle = recepteur -->
-          <div class="row-compact hidden" id="emColRow">
-            <div>
-              <label for="emFuncCol">Fonction</label>
-              <select id="emFuncCol"></select>
-            </div>
-            <div>
-              <label for="emEntityCol">Entité</label>
-              <select id="emEntityCol"></select>
+              <label for="emEntity">Entité</label>
+              <select id="emEntity" disabled></select>
             </div>
           </div>
         </div>
 
-        <!-- RÉCEPTEUR -->
+        <!-- RÉCEPTEUR (CORRESPONDANT) -->
         <div class="card">
-          <h3 id="titleRecepteur">Récepteur</h3>
+          <h3>Récepteur</h3>
           <div class="row-compact-3">
             <div>
-              <label for="reNum" id="labelReNum">N°</label>
+              <label for="reNum">N°</label>
               <input id="reNum" inputmode="numeric" placeholder="Numéro" />
             </div>
-            <div style="align-self=end">
+            <div style="align-self:end">
               <button class="btn iconbtn" id="reGen" title="Générer"><span>↻</span></button>
             </div>
             <div>
-              <label for="reName" id="labelReName">Nom (MAJ)</label>
+              <label for="reName">Nom (MAJ)</label>
               <input id="reName" placeholder="NOM RÉCEPTEUR (MAJ)" required />
             </div>
           </div>
           <div class="row-compact">
             <div>
-              <label for="reFuncOwn">Fonction</label>
-              <select id="reFuncOwn" disabled></select>
+              <label for="reFunc">Fonction</label>
+              <select id="reFunc"></select>
             </div>
             <div>
-              <label for="reEntityOwn">Entité</label>
-              <select id="reEntityOwn" disabled></select>
-            </div>
-          </div>
-          <!-- Collaborateur si rôle = emetteur -->
-          <div class="row-compact hidden" id="reColRow">
-            <div>
-              <label for="reFuncCol">Fonction</label>
-              <select id="reFuncCol"></select>
-            </div>
-            <div>
-              <label for="reEntityCol">Entité</label>
-              <select id="reEntityCol"></select>
+              <label for="reEntity">Entité</label>
+              <select id="reEntity"></select>
             </div>
           </div>
         </div>

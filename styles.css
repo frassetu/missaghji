@@ -8,12 +8,11 @@ header.appbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;j
 .appbar .title img{width:28px;height:28px;border-radius:6px}
 .menu{position:relative;display:flex;gap:.4rem;align-items:center}
 .menu .inline > *{margin-left:.25rem}
-.menu button, .menu a{background:var(--orange);color:#fff;border:0;border-radius:10px;padding:.45rem .7rem;cursor:pointer}
-.menu button.ghost{background:transparent;color:var(--black);border:1px solid var(--border)}
+.menu button{background:var(--orange);color:#fff;border:0;border-radius:10px;padding:.45rem .7rem;cursor:pointer}
+.menu button.ghost{background:transparent;color:#111;border:1px solid var(--border)}
 .menu button.secondary{background:var(--black)}
 #btnMenu{display:none;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;background:var(--black);color:#fff}
 #menuDropdown{display:none;position:absolute;right:0;top:42px;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.08);padding:.5rem;min-width:220px}
-#menuDropdown button, #menuDropdown select{width:100%;margin:.25rem 0}
 .menu.open #menuDropdown{display:block}
 .container{max-width:980px;margin:0 auto;padding:1rem}
 .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1rem 1.2rem;margin:.8rem 0}
@@ -27,7 +26,7 @@ input[readonly], select:disabled{background:#f9fafb}
 textarea{min-height:120px}
 .btn{background:var(--orange);color:#fff;border:0;border-radius:10px;padding:.6rem .8rem;cursor:pointer}
 .btn.secondary{background:var(--black)}
-.btn.ghost{background:transparent;color:var(--black);border:1px solid var(--border)}
+.btn.ghost{background:transparent;color:#111;border:1px solid var(--border)}
 .small{font-size:.9rem;color:var(--muted)}
 .hidden{display:none}
 .table{width:100%;border-collapse:collapse}
@@ -36,7 +35,7 @@ textarea{min-height:120px}
 .center{display:flex;align-items:center;justify-content:center}
 
 /* Compact rows */
-.row-compact-3{display:grid;grid-template-columns:minmax(120px,1fr) 1fr auto;gap:10px;align-items:end}
+.row-compact-3{display:grid;grid-template-columns:minmax(110px,1fr) 1fr auto;gap:10px;align-items:end}
 .row-compact{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(min-width:641px){ .row-compact-3{grid-template-columns:minmax(140px,1fr) 1fr auto} }
 
