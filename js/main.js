@@ -1,0 +1,1 @@
+document.getElementById("header").innerHTML = "Utilisateur: "+localStorage.getItem("username")+" ("+localStorage.getItem("entity")+")";
