@@ -1,0 +1,10 @@
+
+body.screen{background:#0A3D62;color:white;font-family:Arial;margin:0;padding:20px}
+.card{background:#1E2A38;padding:20px;border-radius:10px;max-width:400px;margin:auto}
+.title{text-align:center;color:#60aaff}
+label{margin-top:10px;display:block}
+input,select,textarea{width:100%;padding:8px;margin-top:5px;border-radius:5px;border:1px solid #2a4e6c;background:#0f2a44;color:white}
+.btn{margin-top:15px;padding:10px;width:100%;border:none;background:#3273dc;border-radius:5px;color:white;font-weight:bold}
+.block{background:#1E2A38;padding:15px;margin-top:15px;border-radius:10px}
+.menu{position:absolute;right:20px;top:20px;cursor:pointer}
+#history{white-space:pre-wrap}
