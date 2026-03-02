@@ -1,5 +1,5 @@
 (function(){
-  const APP_VERSION = 'v1.0.2';
+  const APP_VERSION = 'v1.0.3';
   const BO = ['BOBA','BOCC','BOES','BOGA','BOGB','BOPO','BOVA','AOC'];
   const AUTH = ['BAO', ...BO];
   const F_BY_E = { BAO:['CEX'], DELCO:['CCO'], BOBA:['CDC','CDT','CDR','PDA','PDE','PDM','PDS'], BOCC:['CDC','CDT','CDR','PDA','PDE','PDM','PDS'], BOES:['CDC','CDT','CDR','PDA','PDE','PDM','PDS'], BOGA:['CDC','CDT','CDR','PDA','PDE','PDM','PDS'], BOGB:['CDC','CDT','CDR','PDA','PDE','PDM','PDS'], BOPO:['CDC','CDT','CDR','PDA','PDE','PDM','PDS'], BOVA:['CDC','CDT','CDR','PDA','PDE','PDM','PDS'], AOC:['CDC','CDT','CDR','PDA','PDE','PDM','PDS'] };
@@ -12,9 +12,9 @@
   const isBO=e=>BO.includes(e);
 
   // i18n
-  const i18n={ fr:{id:'Identification',hint:'Entrez votre Nom et choisissez votre Entité.',installer:'Installer',installerQ:'Installer ?',historique:'Historique',changer:'Changer entité',role:'Rôle',hh:'Heure (HH)',mm:'Minutes (MM)',actualiser:'Actualiser',num:'N°',nom:'Nom',nomMaj:'Nom (MAJ)',fonction:'Fonction',entite:'Entité',message:'Message',enregistrer:'Enregistrer',refresh:'Rafraîchir'}, co:{id:'Identificazione',hint:"Mettite u vostru Nome è sceglite l'Entità.",installer:'Installà',installerQ:'Installà ?',historique:'Storicu',changer:'Cambià entità',role:'Rolu',hh:'Ora (HH)',mm:'Minuti (MM)',actualiser:'Attualizà',num:'N°',nom:'Nome',nomMaj:'Nome (MAI)',fonction:'Funzione',entite:'Entità',message:'Messaghju',enregistrer:'Arregistrà',refresh:'Rinfrescà'} };
+  const i18n={ fr:{id:'Identification',hint:'Entrez votre Nom et choisissez votre Entité.',installer:'Installer',installerQ:'Installer ?',historique:'Historique',changer:'Changer entité',role:'Rôle',hh:'Heure (HH)',mm:'Minutes (MM)',actualiser:'Actualiser',num:'N°',nom:'Nom',nomMaj:'Nom (MAJ)',fonction:'Fonction',entite:'Entité',message:'Message',valider:'Valider',refresh:'Rafraîchir'}, co:{id:'Identificazione',hint:"Mettite u vostru Nome è sceglite l'Entità.",installer:'Installà',installerQ:'Installà ?',historique:'Storicu',changer:'Cambià entità',role:'Rolu',hh:'Ora (HH)',mm:'Minuti (MM)',actualiser:'Attualizà',num:'N°',nom:'Nome',nomMaj:'Nome (MAI)',fonction:'Funzione',entite:'Entità',message:'Messaghju',valider:'Validà',refresh:'Rinfrescà'} };
   function L(){ const s=ls.get(STORAGE.settings,{lang:'fr'}); return i18n[s.lang] || i18n['fr']; }
-  function applyLang(){ const t=L(); ['btnInstall','mInstall'].forEach(id=>$(id).textContent=t.installer); ['btnInstallHelp','mInstallHelp'].forEach(id=>$(id).textContent=t.installerQ); ['btnHistory','mHistory'].forEach(id=>$(id).textContent=t.historique); ['btnChangeEntity','mChangeEntity'].forEach(id=>$(id).textContent=t.changer); $('titleAuth').textContent=t.id; $('authHint').textContent=t.hint; $('labelAuthName').textContent=t.nom; $('labelAuthEntity').textContent=t.entite; $('authValidate').textContent='Valider'; $('titleContext').textContent='Contexte'; $('labelRole').textContent=t.role; $('labelHH').textContent=t.hh; $('labelMM').textContent=t.mm; $('btnNow').textContent=t.actualiser; $('titleEmetteur').textContent='Émetteur'; $('titleRecepteur').textContent='Récepteur'; $('labelEmNum').textContent=t.num; $('labelEmName').textContent=t.nom; $('labelEmFunc').textContent=t.fonction; $('labelEmEntity').textContent=t.entite; $('labelReNum').textContent=t.num; $('labelReName').textContent=t.nomMaj; $('labelReFunc').textContent=t.fonction; $('labelReEntity').textContent=t.entite; $('titleMessage').textContent=t.message; $('btnSave').textContent=t.enregistrer; $('btnRefreshInline').textContent=t.refresh; }
+  function applyLang(){ const t=L(); ['btnInstall','mInstall'].forEach(id=>$(id).textContent=t.installer); ['btnInstallHelp','mInstallHelp'].forEach(id=>$(id).textContent=t.installerQ); ['btnHistory','mHistory'].forEach(id=>$(id).textContent=t.historique); ['btnChangeEntity','mChangeEntity'].forEach(id=>$(id).textContent=t.changer); $('titleAuth').textContent=t.id; $('authHint').textContent=t.hint; $('labelAuthName').textContent=t.nom; $('labelAuthEntity').textContent=t.entite; $('authValidate').textContent=t.valider; $('titleContext').textContent='Contexte'; $('labelRole').textContent=t.role; $('labelHH').textContent=t.hh; $('labelMM').textContent=t.mm; $('btnNow').textContent=t.actualiser; $('titleEmetteur').textContent='Émetteur'; $('titleRecepteur').textContent='Récepteur'; $('labelEmNum').textContent=t.num; $('labelEmName').textContent=t.nom; $('labelEmFunc').textContent=t.fonction; $('labelEmEntity').textContent=t.entite; $('labelReNum').textContent=t.num; $('labelReName').textContent=t.nomMaj; $('labelReFunc').textContent=t.fonction; $('labelReEntity').textContent=t.entite; $('titleMessage').textContent=t.message; $('btnSave').textContent=t.valider; $('btnRefreshInline').textContent=t.refresh; }
 
   function show(view){ Object.values(views).forEach(v=>v.classList.add('hidden')); if(view==='auth'){document.body.classList.add('only-auth');views.auth.classList.remove('hidden')} else if(view==='app'){document.body.classList.remove('only-auth');views.app.classList.remove('hidden')} else {document.body.classList.remove('only-auth');views.history.classList.remove('hidden')} }
   function route(){ const u=ls.get(STORAGE.user,null); if(!u){ show('auth'); return;} const hash=(location.hash||'').replace('#/',''); if(hash==='history') fillHistory(); show(hash==='history'?'history':'app'); refreshBadge(); prepareApp(false); }
@@ -25,9 +25,9 @@
   const langSelect=$('langSelect'), mLangSelect=$('mLangSelect');
   function fillAuth(){ setOptions(authEntity, AUTH); }
 
-  // Strict names filter (letters+accents+space+hyphen+apostrophe) + UPPERCASE
+  // Names filter strict + MAJ
   const lettersRe = /^[A-Za-zÀ-ÖØ-öø-ÿ '\-]+$/;
-  function toLettersOnly(el){ el.addEventListener('input',()=>{ const cleaned = (el.value||'').toUpperCase().replace(/[^A-Za-zÀ-ÖØ-öø-ÿ '\-]/g,''); if(cleaned!==el.value) el.value=cleaned; }); }
+  function toLettersOnly(el){ el.addEventListener('input',()=>{ const cleaned=(el.value||'').toUpperCase().replace(/[^A-Za-zÀ-ÖØ-öø-ÿ '\-]/g,''); if(cleaned!==el.value) el.value=cleaned; }); }
   [authName].forEach(toLettersOnly);
 
   $('authValidate').addEventListener('click',()=>{ const name=(authName.value||'').trim(); const entity=authEntity.value; if(!name || !lettersRe.test(name)){alert('Veuillez saisir un nom (lettres uniquement)'); return;} const u={name,entity}; ls.set(STORAGE.user,u); const c=ls.get(STORAGE.cnt,{}); if(typeof c[entity]==='undefined'){ c[entity]=1; ls.set(STORAGE.cnt,c);} location.hash='#/app'; route(); });
@@ -62,22 +62,19 @@
 
   function enforceCoupling(funcSel, entSel){ if(funcSel.value==='CCO') entSel.value='DELCO'; else if(funcSel.value==='CEX') entSel.value='BAO'; }
 
-  function prepareApp(resetValues){ const u=ls.get(STORAGE.user,null); if(!u) return; const s=ls.get(STORAGE.settings,{lang:'fr',role:'emetteur'}); langSelect.value=s.lang||'fr'; mLangSelect.value=s.lang||'fr'; if(resetValues) setNow();
-    // Lock own side to user entity; configure lists minimally once
+  function prepareApp(resetTime){ const u=ls.get(STORAGE.user,null); if(!u) return; const s=ls.get(STORAGE.settings,{lang:'fr',role:'emetteur'}); langSelect.value=s.lang||'fr'; mLangSelect.value=s.lang||'fr'; if(resetTime) setNow();
     setOptions(ownEntSel(), [u.entity]); ownEntSel().disabled=true; setOptions(ownFuncSel(), F_BY_E[u.entity]); ownFuncSel().disabled=(F_BY_E[u.entity].length===1);
-    ownName().value = (ownName().value||u.name.toUpperCase());
+    if(!ownName().value) ownName().value=u.name.toUpperCase();
     const ents = counterpartEntitiesFor(u.entity); if(colEntSel().options.length===0) setOptions(colEntSel(), ents); colEntSel().disabled=false; const funcs = allowedFunctionsForCounterpart(u.entity); if(colFuncSel().options.length===0) setOptions(colFuncSel(), funcs);
     showGenerators();
   }
 
-  function swapSides(){ // swap values without resetting lists
+  function swapSides(){
     const a={ num:emNum.value, name:emName.value, func:emFunc.value, ent:emEntity.value };
     const b={ num:reNum.value, name:reName.value, func:reFunc.value, ent:reEntity.value };
     emNum.value=b.num; emName.value=b.name; emFunc.value=b.func; emEntity.value=b.ent;
     reNum.value=a.num; reName.value=a.name; reFunc.value=a.func; reEntity.value=a.ent;
-    // enforce constraints on both sides
     enforceCoupling(emFunc, emEntity); enforceCoupling(reFunc, reEntity);
-    // ensure own side entity equals the user's entity
     const u=ls.get(STORAGE.user,null); setOptions(ownEntSel(), [u.entity]); ownEntSel().value=u.entity; ownEntSel().disabled=true;
   }
 
@@ -86,13 +83,6 @@
 
   function applyCouplingFromEntity(entitySel, funcSel, userEntity){ const ent=entitySel.value; if(ent==='BAO'){ setOptions(funcSel,['CEX']); funcSel.disabled=true; entitySel.disabled=false; } else if(ent==='DELCO'){ setOptions(funcSel,['CCO']); funcSel.disabled=true; entitySel.disabled=false; } else if(isBO(ent)){ const allowed=allowedFunctionsForCounterpart(userEntity); const boFuncs=Array.from(new Set(BO.flatMap(e=>F_BY_E[e]))); const final = boFuncs.filter(f=>allowed.includes(f)); setOptions(funcSel, final.length?final:['CDC']); funcSel.disabled=false; entitySel.disabled=false; } }
   function applyCouplingFromFunction(funcSel, entitySel, userEntity){ const fn=funcSel.value; const allowedEnts=counterpartEntitiesFor(userEntity); if(fn==='CEX'){ if(!allowedEnts.includes('BAO')) allowedEnts.unshift('BAO'); setOptions(entitySel, allowedEnts); entitySel.value='BAO'; entitySel.disabled=false; } else if(fn==='CCO'){ if(!allowedEnts.includes('DELCO')) allowedEnts.unshift('DELCO'); setOptions(entitySel, allowedEnts); entitySel.value='DELCO'; entitySel.disabled=false; } else { const boOnly = BO.filter(e=>allowedEnts.includes(e)); setOptions(entitySel, boOnly.length?boOnly:allowedEnts); const lastBo = ls.get(STORAGE.lastBo,null); const candidate = (lastBo && entitySel.querySelector(`option[value="${lastBo}"]`)) ? lastBo : (isBO(entitySel.value)?entitySel.value: (boOnly[0]||allowedEnts[0])); entitySel.value=candidate; entitySel.disabled=false; } }
-  function applyCouplingBothWays(userEntity){ const fSel=colFuncSel(), eSel=colEntSel(); if(fSel.value){ applyCouplingFromFunction(fSel,eSel,userEntity); } else { applyCouplingFromEntity(eSel,fSel,userEntity); } }
-  function onEntityChange(){ const u=ls.get(STORAGE.user,null); const E=colEntSel(); if(isBO(E.value)) ls.set(STORAGE.lastBo, E.value); applyCouplingFromEntity(E, colFuncSel(), u.entity); enforceCoupling(colFuncSel(), colEntSel()); }
-  function onFuncChange(){ const u=ls.get(STORAGE.user,null); applyCouplingFromFunction(colFuncSel(), colEntSel(), u.entity); enforceCoupling(colFuncSel(), colEntSel()); }
-  reEntity.addEventListener('change', ()=>{ if(isEmitter()) onEntityChange(); });
-  reFunc.addEventListener('change', ()=>{ if(isEmitter()) onFuncChange(); });
-  emEntity.addEventListener('change', ()=>{ if(!isEmitter()) onEntityChange(); });
-  emFunc.addEventListener('change', ()=>{ if(!isEmitter()) onFuncChange(); });
 
   function loadCounters(){ return ls.get(STORAGE.cnt,{}); }
   function saveCounters(c){ ls.set(STORAGE.cnt,c); }
@@ -100,16 +90,37 @@
   emGen.addEventListener('click', ()=>{ const u=ls.get(STORAGE.user,null); if(!u) return; if(!isEmitter()){ alert('Le générateur actif est côté Récepteur'); return; } emNum.value = nextNumberFor(u.entity); });
   reGen.addEventListener('click', ()=>{ const u=ls.get(STORAGE.user,null); if(!u) return; if(isEmitter()){ alert('Le générateur actif est côté Émetteur'); return; } reNum.value = nextNumberFor(u.entity); });
 
-  function doRefresh(){ const u=ls.get(STORAGE.user,null); if(!u) return; const role=roleSelect.value; if(role==='emetteur'){ if(!emName.value) emName.value=u.name.toUpperCase(); } else { if(!reName.value) reName.value=u.name.toUpperCase(); } }
-  $('btnRefreshInline').addEventListener('click', doRefresh);
+  function cleanReset(){
+    const u=ls.get(STORAGE.user,null); if(!u) return; // role unchanged
+    // clear numbers and message
+    emNum.value=''; reNum.value=''; message.value='';
+    // keep functions/entities; reset counterpart name; keep own name
+    if(isEmitter()){ emName.value=u.name.toUpperCase(); reName.value=''; } else { reName.value=u.name.toUpperCase(); emName.value=''; }
+    setNow();
+  }
 
-  $('btnSave').addEventListener('click', ()=>{ const u=ls.get(STORAGE.user,null); if(!u){ alert("Identifiez-vous d'abord"); location.hash='#/auth'; route(); return; } const role = roleSelect.value; const emitterSide = { num: role === 'emetteur' ? emNum.value : reNum.value, name: role === 'emetteur' ? emName.value : reName.value, func: role === 'emetteur' ? emFunc.value : reFunc.value, ent: role === 'emetteur' ? emEntity.value : reEntity.value }; const receiverSide = { num: role === 'emetteur' ? reNum.value : emNum.value, name: role === 'emetteur' ? reName.value : emName.value, func: role === 'emetteur' ? reFunc.value : emFunc.value, ent: role === 'emetteur' ? reEntity.value : emEntity.value };
-    if(!(emitterSide.name||'').trim() || !(receiverSide.name||'').trim()){ alert('Nom émetteur et nom récepteur requis'); return; } if(!lettersRe.test(emitterSide.name) || !lettersRe.test(receiverSide.name)){ alert('Noms: lettres uniquement'); return; }
+  $('btnRefreshInline').addEventListener('click', cleanReset);
+
+  $('btnSave').addEventListener('click', ()=>{
+    const u=ls.get(STORAGE.user,null); if(!u){ alert("Identifiez-vous d'abord"); location.hash='#/auth'; route(); return; }
+    const role = roleSelect.value;
+    const emitterSide = { num: role === 'emetteur' ? emNum.value : reNum.value, name: role === 'emetteur' ? emName.value : reName.value, func: role === 'emetteur' ? emFunc.value : reFunc.value, ent: role === 'emetteur' ? emEntity.value : reEntity.value };
+    const receiverSide = { num: role === 'emetteur' ? reNum.value : emNum.value, name: role === 'emetteur' ? reName.value : emName.value, func: role === 'emetteur' ? reFunc.value : emFunc.value, ent: role === 'emetteur' ? reEntity.value : emEntity.value };
+
+    if(!(emitterSide.name||'').trim() || !(receiverSide.name||'').trim()){ alert('Nom émetteur et nom récepteur requis'); return; }
+    if(!lettersRe.test(emitterSide.name) || !lettersRe.test(receiverSide.name)){ alert('Noms: lettres uniquement'); return; }
+
     const d=new Date(); const date=d.toLocaleDateString('fr-FR'); const time=`${(hh.value||'').padStart(2,'0')}:${(mm.value||'').padStart(2,'0')}` || `${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
     const rec={ time: `${date} ${time}`, emNum:(emitterSide.num||'').trim(), emName:emitterSide.name.trim().toUpperCase(), emFunc:emitterSide.func, emEntity:emitterSide.ent, reNum:(receiverSide.num||'').trim(), reName:receiverSide.name.trim().toUpperCase(), reFunc:receiverSide.func, reEntity:receiverSide.ent, message:(message.value||'').trim() };
+
     if(!rec.message){ alert('Message vide'); return; }
     if( (rec.emFunc==='CEX' && rec.reFunc==='CEX') || (isBO(rec.emEntity) && isBO(rec.reEntity)) ){ alert('Combinaison non autorisée'); return; }
-    const hist=ls.get(STORAGE.hist,[]); hist.push(rec); ls.set(STORAGE.hist,hist); const hint=$('saveHint'); hint.textContent='Enregistré ✓'; setTimeout(()=>hint.textContent='',1200);
+
+    const hist=ls.get(STORAGE.hist,[]); hist.push(rec); ls.set(STORAGE.hist,hist);
+
+    // Popup demandé : alert
+    alert('Message Validé');
+    cleanReset();
   });
 
   function fillHistory(){ const tb=document.querySelector('#historyTable tbody'); tb.innerHTML=''; const hist=ls.get(STORAGE.hist,[]); hist.forEach(r=>{ const tr=document.createElement('tr'); [r.time,r.emNum,r.emName,r.emFunc,r.emEntity,r.reNum,r.reName,r.reFunc,r.reEntity,r.message].forEach(v=>{ const td=document.createElement('td'); td.textContent=v??''; tr.appendChild(td); }); tb.appendChild(tr); }); }
