@@ -1,9 +1,0 @@
-{
-  "name": "Messagerie PWA",
-  "short_name": "MsgPWA",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#0a3d62",
-  "icons": []
-}
