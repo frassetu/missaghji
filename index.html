@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="fr">
 <head>
@@ -11,11 +12,11 @@
   <link rel="stylesheet" href="styles.css">
   <script defer src="app.js"></script>
   <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(console.error);
-    });
-  }
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(console.error);
+      });
+    }
   </script>
   <style> .only-auth header.appbar{display:none} </style>
 </head>
@@ -25,7 +26,6 @@
       <img src="icons/icon-192.png" alt="logo"/>
       <strong>Missaghji</strong>
       <span class="badge" id="idBadge"></span>
-      <span class="badge" id="versionBadge"></span>
     </div>
     <div class="menu" id="menuWrap">
       <button id="btnMenu">☰</button>
@@ -51,6 +51,7 @@
       </div>
     </div>
   </header>
+
   <main class="container">
     <!-- AUTH -->
     <section id="view-auth" class="card">
@@ -126,7 +127,7 @@
           </div>
         </div>
 
-        <!-- RÉCEPTEUR -->
+        <!-- RÉCEPTEUR (CORRESPONDANT) -->
         <div class="card">
           <h3 id="titleRecepteur">Récepteur</h3>
           <div class="row-compact-3">
