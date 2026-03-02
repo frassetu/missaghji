@@ -4,51 +4,58 @@ if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
 }
 
-// --- Constants
-const ENTITIES = ["BAO","BOBA","BOCC","BOES","BOGA","BOGB","BOPO","BOVA"]; // DELCO pas sur accueil
-const BO_LIST = ["BOBA","BOCC","BOES","BOGA","BOGB","BOPO","BOVA"];
+const BO_LIST = ["BOBA","BOCC","BOES","BOGA","BOGB","BOPO","BOVA"]; // All BOs
 const BO_FUNCS = ["CDC","CDT","CDR","PDA","PDE","PDM","PDS"];
-const VERSION = "v1.0.0";
+const VERSION = window.APP_VERSION || 'v1.1.0';
 
-// --- Utils
+// --- Helpers
 const $ = (id)=>document.getElementById(id);
-const qs = (sel,root=document)=>root.querySelector(sel);
-function lettersOnly(str){return (/^[A-Za-zÀ-ÖØ-öø-ÿ\-\s]+$/u).test(str.trim());}
+function lettersOnly(str){return (/^[A-Za-zÀ-ÖØ-öø-ÿ\-\s]+$/u).test((str||'').trim());}
 function clampNum(n){n = parseInt(n||0,10); if(isNaN(n)||n<1) return 1; if(n>999) return 999; return n;}
 function nextNum(){ let n = parseInt(localStorage.getItem('num')||'0',10); n = n>=999?1:n+1; localStorage.setItem('num', String(n)); return n; }
 function nowHM(){ const d=new Date(); return {h:String(d.getHours()).padStart(2,'0'), m:String(d.getMinutes()).padStart(2,'0')}; }
 function isBO(ent){return BO_LIST.includes(ent);}
+function allowedCorrespondentEntities(userEnt){ return isBO(userEnt)? ['BAO','DELCO'] : BO_LIST.concat(['DELCO']); }
 
 // --- Start page
 function setupStart(){
   const form = $('startForm'); if(!form) return;
   const input = $('username');
-  // live cleanup (keep letters/spaces/hyphens)
-  input.addEventListener('input', ()=>{
-    input.value = input.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu, '');
-  });
+  input.addEventListener('input', ()=>{ input.value = input.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,'').toUpperCase(); });
   form.addEventListener('submit', (e)=>{
     e.preventDefault();
     const name = (input.value||'').trim();
-    if(!name || !lettersOnly(name)){
-      alert('Le nom ne doit contenir que des lettres, espaces ou tirets.');
-      input.focus();
-      return;
-    }
+    if(!name || !lettersOnly(name)) return alert('Le nom ne doit contenir que des lettres, espaces et tirets.');
     const ent = $('entity').value;
     localStorage.setItem('username', name.toUpperCase());
     localStorage.setItem('entity', ent);
     if(!localStorage.getItem('num')) localStorage.setItem('num','0');
     localStorage.setItem('version', VERSION);
-    // Go main
-    window.location.href = 'main.html';
+    location.href = 'main.html';
   });
 }
 
-// --- Main UI
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); deferredPrompt = e; });
+// --- Global state for UI values (to preserve on re-render)
+let currentRole = 'Émetteur'; // or 'Récepteur'
+let state = null;
+function captureState(){
+  const get = id=> $(id) ? $(id).value : '';
+  state = {
+    hour: get('hour'), min: get('min'),
+    enNum: get('enNum'), enName: get('enName'), enFunc: get('enFunc'), enEnt: get('enEnt'),
+    reNum: get('reNum'), reName: get('reName'), reFunc: get('reFunc'), reEnt: get('reEnt'),
+    message: get('message')
+  };
+}
 
+function applyUppercaseLive(ids){
+  ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value = (el.value||'').toUpperCase(); }); });
+}
+function applyLettersOnly(ids){
+  ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value = el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,''); }); });
+}
+
+// --- Main UI render
 function setupMain(){
   if(!$('topbar')) return;
   const user = localStorage.getItem('username')||'';
@@ -60,49 +67,40 @@ function setupMain(){
     </div>
     <div class="burger" id="burger">☰</div>
   `;
-  $('burger').addEventListener('click', openMenu);
-  renderApp('Émetteur');
+  $('burger').addEventListener('click', toggleMenu);
+  $('overlayBackdrop')?.addEventListener('click', toggleMenu);
+  $('closeMenu')?.addEventListener('click', toggleMenu);
+  renderApp();
+  bindMenuActions();
 }
 
-function openMenu(){
-  const c = $('content');
-  c.innerHTML = `
-    <section class="card">
-      <h2>Menu</h2>
-      <div class="actions">
-        <button class="btn primary" id="btnInstall">Installer le PWA</button>
-        <button class="btn" id="btnHistory">Historique</button>
-        <button class="btn ghost" id="btnChange">Changer entité</button>
-        <button class="btn ghost" id="btnBack">Retour</button>
-      </div>
-      <p class="small">DELCO n'est pas disponible sur la page d'accueil, mais peut être sélectionné comme correspondant.</p>
-    </section>
-  `;
-  $('btnInstall').onclick = ()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt=null; } else alert('Installation non disponible (déjà installée ou non supportée).'); };
-  $('btnHistory').onclick = showHistory;
-  $('btnChange').onclick = ()=> window.location.href = 'index.html';
-  $('btnBack').onclick = ()=> renderApp(currentRole);
+function toggleMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.toggle('hidden'); }
+function bindMenuActions(){
+  $('btnInstall')?.addEventListener('click', ()=>{ if(window.deferredPrompt){ window.deferredPrompt.prompt(); window.deferredPrompt=null; } else alert('Installation non disponible.'); });
+  $('btnHistory')?.addEventListener('click', showHistory);
+  $('btnChange')?.addEventListener('click', ()=> location.href='index.html');
 }
 
-let currentRole = 'Émetteur';
+window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); window.deferredPrompt = e; });
 
-function renderApp(role){
-  currentRole = role || currentRole;
+function renderApp(){
   const user = localStorage.getItem('username')||'';
   const ent  = localStorage.getItem('entity')||'';
-  const isUserBO = isBO(ent);
-  const hm = nowHM();
   const c = $('content');
+  const hm = nowHM();
 
-  // Build selects
-  const funcOptionsUser = (ent==='BAO') ? '<option value="CEX">CEX</option>' : BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
-  // Receiver entity options depending on user role/entity
-  let recvEntOptions = '';
-  if(isUserBO){ // user is BO → receiver must be BAO or DELCO
-    recvEntOptions = ['BAO','DELCO'].map(x=>`<option value="${x}">${x}</option>`).join('');
-  } else { // user is BAO → can target BO* or DELCO
-    recvEntOptions = BO_LIST.concat(['DELCO']).map(x=>`<option value="${x}">${x}</option>`).join('');
-  }
+  // Pre-fill from saved state if exists
+  const s = state || {};
+
+  const meSide = (currentRole==='Émetteur') ? 'sender' : 'receiver';
+  const otherSide = (meSide==='sender') ? 'receiver' : 'sender';
+  const corrOptions = allowedCorrespondentEntities(ent);
+
+  // Build correspondent entity options
+  const optionsCorr = corrOptions.map(x=>`<option value="${x}" ${s[otherSide==='sender'?'enEnt':'reEnt']===x?'selected':''}>${x}</option>`).join('');
+
+  // User function select (me-side): BAO=CEX locked; BO=BO_FUNCS choices
+  const meFuncOptions = (ent==='BAO') ? '<option value="CEX" selected>CEX</option>' : BO_FUNCS.map(f=>`<option value="${f}" ${s[meSide==='sender'?'enFunc':'reFunc']===f?'selected':''}>${f}</option>`).join('');
 
   c.innerHTML = `
     <section class="card block">
@@ -118,11 +116,11 @@ function renderApp(role){
         <div class="row">
           <div>
             <label for="hour">Heure</label>
-            <input type="number" id="hour" min="0" max="23" value="${hm.h}" />
+            <input type="number" id="hour" min="0" max="23" value="${s.hour||hm.h}" />
           </div>
           <div>
             <label for="min">Minutes</label>
-            <input type="number" id="min" min="0" max="59" value="${hm.m}" />
+            <input type="number" id="min" min="0" max="59" value="${s.min||hm.m}" />
           </div>
         </div>
       </div>
@@ -132,45 +130,47 @@ function renderApp(role){
     </section>
 
     <section class="card block">
-      <h3>Émetteur <span class="badge">${currentRole==='Émetteur'?'MOI':''}</span></h3>
+      <h3>Émetteur <span class="badge">${meSide==='sender'?'MOI':''}</span></h3>
       <div class="row">
         <div>
           <label>N°</label>
           <div class="row">
-            <input type="number" id="enNum" min="1" max="999" placeholder="1-999" />
-            <button class="btn" id="enGen">⟳</button>
+            <input type="number" id="enNum" min="1" max="999" placeholder="1-999" value="${s.enNum||''}" />
+            ${meSide==='sender'? '<button class="btn" id="enGen">⟳</button>' : ''}
           </div>
         </div>
         <div>
           <label>Nom</label>
-          <input type="text" id="enName" placeholder="Nom" />
+          <input type="text" id="enName" placeholder="NOM" value="${s.enName||''}" />
         </div>
       </div>
       <div class="row">
         <div>
           <label>Fonction</label>
-          <select id="enFunc">${funcOptionsUser}</select>
+          <select id="enFunc"></select>
         </div>
         <div>
           <label>Entité</label>
-          <input type="text" id="enEnt" />
+          ${meSide==='sender' ?
+            `<input type="text" id="enEnt" value="${ent}" disabled />` :
+            `<select id="enEnt">${optionsCorr}</select>`}
         </div>
       </div>
     </section>
 
     <section class="card block">
-      <h3>Récepteur <span class="badge">${currentRole==='Récepteur'?'MOI':''}</span></h3>
+      <h3>Récepteur <span class="badge">${meSide==='receiver'?'MOI':''}</span></h3>
       <div class="row">
         <div>
           <label>N°</label>
           <div class="row">
-            <input type="number" id="reNum" min="1" max="999" placeholder="1-999" />
-            <button class="btn" id="reGen">⟳</button>
+            <input type="number" id="reNum" min="1" max="999" placeholder="1-999" value="${s.reNum||''}" />
+            ${meSide==='receiver'? '<button class="btn" id="reGen">⟳</button>' : ''}
           </div>
         </div>
         <div>
           <label>Nom</label>
-          <input type="text" id="reName" placeholder="Nom" />
+          <input type="text" id="reName" placeholder="NOM" value="${s.reName||''}" />
         </div>
       </div>
       <div class="row">
@@ -180,14 +180,16 @@ function renderApp(role){
         </div>
         <div>
           <label>Entité</label>
-          <select id="reEnt">${recvEntOptions}</select>
+          ${meSide==='receiver' ?
+            `<input type="text" id="reEnt" value="${ent}" disabled />` :
+            `<select id="reEnt">${optionsCorr}</select>`}
         </div>
       </div>
     </section>
 
     <section class="card block">
       <h3>Message</h3>
-      <textarea id="message" placeholder="Écrire le message..."></textarea>
+      <textarea id="message" placeholder="ÉCRIRE LE MESSAGE...">${s.message||''}</textarea>
       <div class="actions">
         <button class="btn primary" id="btnSave">Valider</button>
         <button class="btn ghost" id="btnReset">Réinitialiser</button>
@@ -195,92 +197,63 @@ function renderApp(role){
     </section>
   `;
 
-  // Lock/prepare according to role
-  applyRoleLocks();
+  // Inject function options for both sides according to ent selections
+  // Me-side fixed:
+  const enFuncEl = $('enFunc');
+  const reFuncEl = $('reFunc');
+
+  // Configure name/ent disables according to me-side
+  if(meSide==='sender'){
+    $('enName').value = user; $('enName').disabled = true; // user name fixed
+    enFuncEl.innerHTML = (ent==='BAO') ? '<option value="CEX" selected>CEX</option>' : BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
+    if(ent==='BAO') enFuncEl.disabled=true; else enFuncEl.disabled=false;
+  } else {
+    $('reName').value = user; $('reName').disabled = true;
+    reFuncEl.innerHTML = (ent==='BAO') ? '<option value="CEX" selected>CEX</option>' : BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
+    if(ent==='BAO') reFuncEl.disabled=true; else reFuncEl.disabled=false;
+  }
+
+  // Configure correspondent function select reacts to its entity
+  function updateCorrFunc(which){
+    const entVal = $(which==='sender'?'enEnt':'reEnt').value;
+    const funcEl = which==='sender'? enFuncEl : reFuncEl;
+    if(entVal==='BAO'){ funcEl.innerHTML='<option value="CEX">CEX</option>'; funcEl.disabled=true; }
+    else if(entVal==='DELCO'){ funcEl.innerHTML='<option value="CCO">CCO</option>'; funcEl.disabled=true; }
+    else { funcEl.innerHTML=BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join(''); funcEl.disabled=false; }
+  }
+
+  if(meSide==='sender'){
+    // Correspondent is receiver side
+    if($('reEnt') && $('reEnt').tagName==='SELECT'){
+      updateCorrFunc('receiver');
+      $('reEnt').addEventListener('change', ()=>updateCorrFunc('receiver'));
+    }
+  } else {
+    // Correspondent is sender side
+    if($('enEnt') && $('enEnt').tagName==='SELECT'){
+      updateCorrFunc('sender');
+      $('enEnt').addEventListener('change', ()=>updateCorrFunc('sender'));
+    }
+  }
 
   // Handlers
   $('btnNow').onclick = ()=>{const n=nowHM(); $('hour').value=n.h; $('min').value=n.m;};
-  $('role').onchange = ()=>{ invertValues(); currentRole = $('role').value; applyRoleLocks(); };
-  $('enGen').onclick = (e)=>{e.preventDefault(); $('enNum').value = nextNum(); };
-  $('reGen').onclick = (e)=>{e.preventDefault(); $('reNum').value = nextNum(); };
+  $('role').onchange = ()=>{ captureState(); currentRole = $('role').value; renderApp(); };
+  $('enGen')?.addEventListener('click', (e)=>{ e.preventDefault(); $('enNum').value = nextNum(); });
+  $('reGen')?.addEventListener('click', (e)=>{ e.preventDefault(); $('reNum').value = nextNum(); });
 
-  // Name filters (no digits)
-  const nameFilter = (el)=> el.addEventListener('input', ()=>{ el.value = el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,''); });
-  nameFilter($('enName')); nameFilter($('reName'));
-
-  // Receiver function behavior based on receiver entity
-  function updateReceiverFunc(){
-    const entR = $('reEnt').value;
-    const rf = $('reFunc');
-    if(entR==='BAO'){
-      rf.innerHTML = '<option value="CEX">CEX</option>';
-      rf.disabled = true;
-    } else if(entR==='DELCO'){
-      rf.innerHTML = '<option value="CCO">CCO</option>';
-      rf.disabled = true;
-    } else { // BOx
-      rf.innerHTML = BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
-      rf.disabled = false;
-    }
-  }
-  updateReceiverFunc();
-  $('reEnt').onchange = updateReceiverFunc;
+  // Filters: letters only and uppercase everywhere
+  applyLettersOnly(['enName','reName']);
+  applyUppercaseLive(['enName','reName','message']);
 
   $('btnSave').onclick = (e)=>{ e.preventDefault(); saveMessage(); };
-  $('btnReset').onclick = (e)=>{ e.preventDefault(); renderApp(currentRole); };
-}
-
-function applyRoleLocks(){
-  const user = localStorage.getItem('username')||'';
-  const ent  = localStorage.getItem('entity')||'';
-
-  // Reset enable state
-  ['enName','enEnt','reName','reEnt'].forEach(id=> $(id).disabled=false);
-  $('enFunc').disabled=false; $('reFunc').disabled=false;
-
-  if(currentRole==='Émetteur'){
-    // User on sender side
-    $('enName').value = user; $('enName').disabled = true;
-    $('enEnt').value  = ent;  $('enEnt').disabled  = true;
-    if(ent==='BAO'){
-      $('enFunc').innerHTML = '<option value="CEX">CEX</option>';
-      $('enFunc').disabled = true;
-    } else {
-      $('enFunc').innerHTML = BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
-      $('enFunc').disabled = false;
-    }
-  } else {
-    // User on receiver side
-    $('reName').value = user; $('reName').disabled = true;
-    // Receiver entity depends on user's fixed entity
-    // If user is BAO → receiver (me) is BAO; If user is BO → receiver (me) is that BO
-    $('reEnt').outerHTML = `<input type="text" id="reEnt" value="${ent}" disabled />`;
-    // Receiver function for me
-    if(ent==='BAO'){
-      $('reFunc').innerHTML = '<option value="CEX">CEX</option>';
-      $('reFunc').disabled = true;
-    } else {
-      $('reFunc').innerHTML = BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
-      $('reFunc').disabled = false;
-    }
-  }
-}
-
-function invertValues(){
-  // swap numbers
-  const enNum = $('enNum').value; $('enNum').value = $('reNum').value; $('reNum').value = enNum;
-  // swap names
-  const enName = $('enName').value; $('enName').value = $('reName').value; $('reName').value = enName;
-  // swap functions (copying values)
-  const enFuncVal = $('enFunc').value; const reFuncVal = $('reFunc').value; $('enFunc').value = reFuncVal; $('reFunc').value = enFuncVal;
-  // swap entities (if both are selects/inputs present)
-  const enEntVal = $('enEnt').value; const reEntVal = $('reEnt').value; $('enEnt').value = reEntVal; $('reEnt').value = enEntVal;
+  $('btnReset').onclick = (e)=>{ e.preventDefault(); state=null; renderApp(); };
 }
 
 function saveMessage(){
   const rec = {
     date: new Date().toLocaleDateString('fr-FR'),
-    time: `${$('hour').value.padStart(2,'0')}:${$('min').value.padStart(2,'0')}`,
+    time: `${$('hour').value.toString().padStart(2,'0')}:${$('min').value.toString().padStart(2,'0')}`,
     role: $('role').value,
     em_num: String(clampNum($('enNum').value||nextNum())),
     em_name: $('enName').value.trim(),
@@ -300,20 +273,21 @@ function saveMessage(){
     alert('Les noms ne doivent contenir que des lettres, espaces et tirets.'); return;
   }
 
-  // Validate entities vs rules when user is BO
+  // Validate correspondent constraints based on user's entity
   const userEnt = localStorage.getItem('entity')||'';
+  const corrEnt = (currentRole==='Émetteur') ? rec.re_ent : rec.em_ent;
   if(isBO(userEnt)){
-    if(!(rec.re_ent==='BAO' || rec.re_ent==='DELCO')){
-      alert('Si vous êtes une BO, le correspondant doit être BAO ou DELCO.'); return;
-    }
+    if(!(corrEnt==='BAO' || corrEnt==='DELCO')){ alert('Si vous êtes une BO, le correspondant doit être BAO ou DELCO.'); return; }
+  } else { // user BAO
+    if(!(BO_LIST.includes(corrEnt) || corrEnt==='DELCO')){ alert('Si vous êtes BAO, le correspondant doit être une BO ou DELCO.'); return; }
   }
 
   const list = JSON.parse(localStorage.getItem('history')||'[]');
   list.push(rec);
   localStorage.setItem('history', JSON.stringify(list));
   alert('Message Validé');
-  // refresh
-  renderApp(currentRole);
+  state=null;
+  renderApp();
 }
 
 function showHistory(){
@@ -322,7 +296,7 @@ function showHistory(){
   if(list.length===0){
     c.innerHTML = `<section class="card"><h2>Historique</h2><p>Aucun message enregistré.</p>
       <div class="actions"><button class="btn" id="back">Retour</button></div></section>`;
-    $('back').onclick = ()=> renderApp(currentRole);
+    $('back').onclick = ()=> renderApp();
     return;
   }
   const out = list.map(x=>{
@@ -332,8 +306,37 @@ function showHistory(){
            `${x.msg}\n-----`;
   }).join("\n");
   c.innerHTML = `<section class="card"><h2>Historique</h2><pre>${out}</pre>
-    <div class="actions"><button class="btn" id="back">Retour</button></div></section>`;
-  $('back').onclick = ()=> renderApp(currentRole);
+    <div class="actions">
+      <button class="btn primary" id="exportCsv">Exporter CSV</button>
+      <button class="btn" id="back">Retour</button>
+    </div></section>`;
+  $('back').onclick = ()=> renderApp();
+  $('exportCsv').onclick = exportCSV;
+  // keep menu bindings available
+  bindMenuActions();
+}
+
+function exportCSV(){
+  const list = JSON.parse(localStorage.getItem('history')||'[]');
+  const sep = ';';
+  const headers = [
+    'Date','Heure','Rôle',
+    'N° Emetteur','Nom Emetteur','Fonction Emetteur','Entité Emetteur',
+    'N° Recepteur','Nom Recepteur','Fonction Recepteur','Entité Recepteur',
+    'Message'
+  ];
+  const rows = list.map(x=>[
+    x.date, x.time, x.role,
+    x.em_num, x.em_name, x.em_func, x.em_ent,
+    x.re_num, x.re_name, x.re_func, x.re_ent,
+    x.msg.replace(/\r?\n/g,' ')
+  ]);
+  const csv = ['\ufeff'+headers.join(sep)].concat(rows.map(r=>r.map(v => '"'+String(v||'').replace('"','""')+'"').join(sep))).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'historique_messages.csv';
+  document.body.appendChild(a); a.click(); a.remove();
 }
 
 // Bootstrap

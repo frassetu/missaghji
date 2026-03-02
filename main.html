@@ -10,6 +10,23 @@
 <body class="screen">
   <header id="topbar" class="topbar"></header>
   <div id="content" class="container"></div>
+
+  <!-- Menu overlay -->
+  <div id="menuOverlay" class="overlay hidden">
+    <div class="overlay-backdrop" id="overlayBackdrop"></div>
+    <aside class="drawer" role="dialog" aria-label="Menu">
+      <div class="drawer-header">
+        <strong>Menu</strong>
+        <button class="btn ghost sm" id="closeMenu" title="Fermer">✕</button>
+      </div>
+      <div class="drawer-content">
+        <button class="btn primary full" id="btnInstall">Installer le PWA</button>
+        <button class="btn full" id="btnHistory">Historique</button>
+        <button class="btn ghost full" id="btnChange">Changer entité</button>
+      </div>
+    </aside>
+  </div>
+
   <script src="app.js"></script>
 </body>
 </html>
