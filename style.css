@@ -1,6 +1,6 @@
 
 :root{
-  /* Palette V1.1.0 : blanc / noir / orange B (#FF8A00) */
+  /* Palette V1.1.x : blanc / noir / orange (#FF8A00) */
   --bg:#FFFFFF; --text:#000000; --muted:#4d4d4d; --card:#F2F2F2;
   --accent:#FF8A00; --btn:#FF8A00; --btnText:#000; --line:#e3e3e3;
 }

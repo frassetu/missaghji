@@ -1,5 +1,5 @@
 
-const CACHE = 'msgop-v1-1-0';
+const CACHE = 'msgop-v1-1-1';
 const ASSETS = [
   'index.html',
   'main.html',

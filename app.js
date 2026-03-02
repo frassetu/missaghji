@@ -6,7 +6,7 @@ if ('serviceWorker' in navigator) {
 
 const BO_LIST = ["BOBA","BOCC","BOES","BOGA","BOGB","BOPO","BOVA"]; // All BOs
 const BO_FUNCS = ["CDC","CDT","CDR","PDA","PDE","PDM","PDS"];
-const VERSION = window.APP_VERSION || 'v1.1.0';
+const VERSION = window.APP_VERSION || 'v1.1.1';
 
 // --- Helpers
 const $ = (id)=>document.getElementById(id);
@@ -47,12 +47,26 @@ function captureState(){
     message: get('message')
   };
 }
-
-function applyUppercaseLive(ids){
-  ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value = (el.value||'').toUpperCase(); }); });
+function invertStateBetweenSides(){
+  if(!state) return;
+  const s = state; // swap all paired fields including numbers
+  [s.enNum, s.reNum] = [s.reNum, s.enNum];
+  [s.enName, s.reName] = [s.reName, s.enName];
+  [s.enFunc, s.reFunc] = [s.reFunc, s.enFunc];
+  [s.enEnt, s.reEnt]   = [s.reEnt, s.enEnt];
 }
-function applyLettersOnly(ids){
-  ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value = el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,''); }); });
+
+function applyUppercaseLive(ids){ ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value = (el.value||'').toUpperCase(); }); }); }
+function applyLettersOnly(ids){ ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value = el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,''); }); }); }
+
+// --- Menu overlay helpers
+function toggleMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.toggle('hidden'); }
+function closeMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.add('hidden'); }
+function bindMenuActions(){
+  const install = ()=>{ if(window.deferredPrompt){ window.deferredPrompt.prompt(); window.deferredPrompt=null; } else alert('Installation non disponible.'); };
+  $('btnInstall')?.addEventListener('click', ()=>{ closeMenu(); install(); });
+  $('btnHistory')?.addEventListener('click', ()=>{ closeMenu(); showHistory(); });
+  $('btnChange')?.addEventListener('click', ()=>{ closeMenu(); location.href='index.html'; });
 }
 
 // --- Main UI render
@@ -68,17 +82,10 @@ function setupMain(){
     <div class="burger" id="burger">☰</div>
   `;
   $('burger').addEventListener('click', toggleMenu);
-  $('overlayBackdrop')?.addEventListener('click', toggleMenu);
-  $('closeMenu')?.addEventListener('click', toggleMenu);
+  $('overlayBackdrop')?.addEventListener('click', closeMenu);
+  $('closeMenu')?.addEventListener('click', closeMenu);
   renderApp();
   bindMenuActions();
-}
-
-function toggleMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.toggle('hidden'); }
-function bindMenuActions(){
-  $('btnInstall')?.addEventListener('click', ()=>{ if(window.deferredPrompt){ window.deferredPrompt.prompt(); window.deferredPrompt=null; } else alert('Installation non disponible.'); });
-  $('btnHistory')?.addEventListener('click', showHistory);
-  $('btnChange')?.addEventListener('click', ()=> location.href='index.html');
 }
 
 window.addEventListener('beforeinstallprompt', (e)=>{ e.preventDefault(); window.deferredPrompt = e; });
@@ -88,19 +95,12 @@ function renderApp(){
   const ent  = localStorage.getItem('entity')||'';
   const c = $('content');
   const hm = nowHM();
-
-  // Pre-fill from saved state if exists
   const s = state || {};
 
   const meSide = (currentRole==='Émetteur') ? 'sender' : 'receiver';
   const otherSide = (meSide==='sender') ? 'receiver' : 'sender';
   const corrOptions = allowedCorrespondentEntities(ent);
-
-  // Build correspondent entity options
   const optionsCorr = corrOptions.map(x=>`<option value="${x}" ${s[otherSide==='sender'?'enEnt':'reEnt']===x?'selected':''}>${x}</option>`).join('');
-
-  // User function select (me-side): BAO=CEX locked; BO=BO_FUNCS choices
-  const meFuncOptions = (ent==='BAO') ? '<option value="CEX" selected>CEX</option>' : BO_FUNCS.map(f=>`<option value="${f}" ${s[meSide==='sender'?'enFunc':'reFunc']===f?'selected':''}>${f}</option>`).join('');
 
   c.innerHTML = `
     <section class="card block">
@@ -197,39 +197,34 @@ function renderApp(){
     </section>
   `;
 
-  // Inject function options for both sides according to ent selections
-  // Me-side fixed:
+  // Setup function options and locks
   const enFuncEl = $('enFunc');
   const reFuncEl = $('reFunc');
 
-  // Configure name/ent disables according to me-side
   if(meSide==='sender'){
-    $('enName').value = user; $('enName').disabled = true; // user name fixed
+    $('enName').value = user; $('enName').disabled = true;
     enFuncEl.innerHTML = (ent==='BAO') ? '<option value="CEX" selected>CEX</option>' : BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
-    if(ent==='BAO') enFuncEl.disabled=true; else enFuncEl.disabled=false;
+    enFuncEl.disabled = (ent==='BAO');
   } else {
     $('reName').value = user; $('reName').disabled = true;
     reFuncEl.innerHTML = (ent==='BAO') ? '<option value="CEX" selected>CEX</option>' : BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
-    if(ent==='BAO') reFuncEl.disabled=true; else reFuncEl.disabled=false;
+    reFuncEl.disabled = (ent==='BAO');
   }
 
-  // Configure correspondent function select reacts to its entity
   function updateCorrFunc(which){
-    const entVal = $(which==='sender'?'enEnt':'reEnt').value;
-    const funcEl = which==='sender'? enFuncEl : reFuncEl;
+    const entVal = (which==='sender'? $('enEnt').value : $('reEnt').value);
+    const funcEl = (which==='sender'? enFuncEl : reFuncEl);
     if(entVal==='BAO'){ funcEl.innerHTML='<option value="CEX">CEX</option>'; funcEl.disabled=true; }
     else if(entVal==='DELCO'){ funcEl.innerHTML='<option value="CCO">CCO</option>'; funcEl.disabled=true; }
     else { funcEl.innerHTML=BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join(''); funcEl.disabled=false; }
   }
 
   if(meSide==='sender'){
-    // Correspondent is receiver side
     if($('reEnt') && $('reEnt').tagName==='SELECT'){
       updateCorrFunc('receiver');
       $('reEnt').addEventListener('change', ()=>updateCorrFunc('receiver'));
     }
   } else {
-    // Correspondent is sender side
     if($('enEnt') && $('enEnt').tagName==='SELECT'){
       updateCorrFunc('sender');
       $('enEnt').addEventListener('change', ()=>updateCorrFunc('sender'));
@@ -238,11 +233,10 @@ function renderApp(){
 
   // Handlers
   $('btnNow').onclick = ()=>{const n=nowHM(); $('hour').value=n.h; $('min').value=n.m;};
-  $('role').onchange = ()=>{ captureState(); currentRole = $('role').value; renderApp(); };
+  $('role').onchange = ()=>{ captureState(); invertStateBetweenSides(); currentRole = $('role').value; renderApp(); };
   $('enGen')?.addEventListener('click', (e)=>{ e.preventDefault(); $('enNum').value = nextNum(); });
   $('reGen')?.addEventListener('click', (e)=>{ e.preventDefault(); $('reNum').value = nextNum(); });
 
-  // Filters: letters only and uppercase everywhere
   applyLettersOnly(['enName','reName']);
   applyUppercaseLive(['enName','reName','message']);
 
@@ -268,17 +262,15 @@ function saveMessage(){
     msg: $('message').value.trim()
   };
 
-  // Validate names (no digits)
   if(!lettersOnly(rec.em_name) || !lettersOnly(rec.re_name)){
     alert('Les noms ne doivent contenir que des lettres, espaces et tirets.'); return;
   }
 
-  // Validate correspondent constraints based on user's entity
   const userEnt = localStorage.getItem('entity')||'';
   const corrEnt = (currentRole==='Émetteur') ? rec.re_ent : rec.em_ent;
   if(isBO(userEnt)){
     if(!(corrEnt==='BAO' || corrEnt==='DELCO')){ alert('Si vous êtes une BO, le correspondant doit être BAO ou DELCO.'); return; }
-  } else { // user BAO
+  } else {
     if(!(BO_LIST.includes(corrEnt) || corrEnt==='DELCO')){ alert('Si vous êtes BAO, le correspondant doit être une BO ou DELCO.'); return; }
   }
 
@@ -312,7 +304,6 @@ function showHistory(){
     </div></section>`;
   $('back').onclick = ()=> renderApp();
   $('exportCsv').onclick = exportCSV;
-  // keep menu bindings available
   bindMenuActions();
 }
 
@@ -329,9 +320,9 @@ function exportCSV(){
     x.date, x.time, x.role,
     x.em_num, x.em_name, x.em_func, x.em_ent,
     x.re_num, x.re_name, x.re_func, x.re_ent,
-    x.msg.replace(/\r?\n/g,' ')
+    (x.msg||'').replace(/\r?\n/g,' ')
   ]);
-  const csv = ['\ufeff'+headers.join(sep)].concat(rows.map(r=>r.map(v => '"'+String(v||'').replace('"','""')+'"').join(sep))).join('\n');
+  const csv = ['\ufeff'+headers.join(sep)].concat(rows.map(r=>r.map(v => '"'+String(v||'').replace(/"/g,'""')+'"').join(sep))).join('\n');
   const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
