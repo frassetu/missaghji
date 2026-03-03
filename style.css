@@ -44,3 +44,29 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
 .drawer{position:relative;width:320px;max-width:86vw;background:var(--card);height:100%;box-shadow:-6px 0 20px #0004;border-left:1px solid var(--line);display:flex;flex-direction:column}
 .drawer-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
 .drawer-content{padding:14px;display:flex;flex-direction:column;gap:10px}
+
+
+/* --- Bloc contexte V1.3.0 --- */
+
+.context-row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+.ctx-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.ctx-item input,
+.ctx-item select {
+    width: 80px;
+}
+
+.ctx-btn button {
+    width: 50px;
+    height: 40px;
+    font-size: 20px;
+    padding: 0;
+}
