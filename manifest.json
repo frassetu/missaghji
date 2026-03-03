@@ -1,12 +1,1 @@
-
-{
-  "name": "Messagerie Opérationnelle",
-  "short_name": "MsgOP",
-  "start_url": "index.html",
-  "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#FF8A00",
-  "icons": [
-    {"src":"icon.png","sizes":"192x192","type":"image/png"}
-  ]
-}
+{"name":"PWA","short_name":"PWA","start_url":"index.html","display":"standalone"}
