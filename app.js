@@ -104,12 +104,12 @@ function renderApp(){
 
   c.innerHTML = `
 
+
 <section class="card block">
   <h3>Contexte</h3>
 
   <div class="context-row">
-    
-    <div class="ctx-item">
+    <div class="ctx-item ctx-item--role">
       <label for="role">Rôle</label>
       <select id="role">
         <option ${currentRole==='Émetteur'?'selected':''}>Émetteur</option>
@@ -117,24 +117,24 @@ function renderApp(){
       </select>
     </div>
 
-    <div class="ctx-item">
+    <div class="ctx-item ctx-item--hour">
       <label for="hour">Heure</label>
-      <input type="number" id="hour" min="0" max="23" value="${s.hour||hm.h}">
+      <input type="tel" inputmode="numeric" pattern="[0-9]*"
+             id="hour" min="0" max="23" value="${s.hour||hm.h}">
     </div>
 
-    <div class="ctx-item">
+    <div class="ctx-item ctx-item--min">
       <label for="min">Minutes</label>
-      <input type="number" id="min" min="0" max="59" value="${s.min||hm.m}">
+      <input type="tel" inputmode="numeric" pattern="[0-9]*"
+             id="min" min="0" max="59" value="${s.min||hm.m}">
     </div>
 
     <div class="ctx-item ctx-btn">
       <label>&nbsp;</label>
-      <button class="btn icon-btn" id="btnNow">⟳</button>
+      <button class="btn icon-btn" id="btnNow" title="Actualiser">⟳</button>
     </div>
-
   </div>
 </section>
-
 
     <section class="card block">
       <h3>Émetteur <span class="badge">${meSide==='sender'?'MOI':''}</span></h3>
