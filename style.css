@@ -46,27 +46,68 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
 .drawer-content{padding:14px;display:flex;flex-direction:column;gap:10px}
 
 
-/* --- Bloc contexte V1.3.0 --- */
 
+/* --- Contexte : mise en ligne adaptative --- */
 .context-row {
-    display: flex;
-    gap: 15px;
-    align-items: flex-end;
+  display: flex;
+  align-items: flex-end;          /* aligne les bas de champs */
+  gap: 12px;
+  flex-wrap: wrap;                /* passe à la ligne si l'écran est étroit */
 }
 
+/* Chaque élément garde son label au-dessus et s'adapte au contenu */
 .ctx-item {
-    display: flex;
-    flex-direction: column;
+  display: inline-flex;
+  flex-direction: column;
+  white-space: nowrap;            /* évite les retours à la ligne internes */
 }
 
-.ctx-item input,
-.ctx-item select {
-    width: 80px;
+/* Le sélecteur de rôle doit s'adapter au texte (Émetteur/Récepteur) */
+.ctx-item--role select {
+  width: auto;                    /* s'adapte au contenu */
+  min-width: 11ch;                /* évite que ça devienne trop petit */
+  max-width: 100%;                /* ne dépasse pas */
 }
 
+/* Les champs heures / minutes : largeur compacte, mais lisible */
+.ctx-item--hour input,
+.ctx-item--min input {
+  width: 5ch;                     /* 2 chiffres + marge */
+  text-align: center;
+}
+
+/* Le bouton ⟳ : parfaitement centré et carré */
+.ctx-btn .btn,
 .ctx-btn button {
-    width: 50px;
-    height: 40px;
-    font-size: 20px;
-    padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;                  /* ~40px */
+  height: 2.5rem;
+  padding: 0;                     /* pas de padding, centré au pixel */
+  line-height: 1;                 /* pas de décalage vertical */
+  font-size: 1.25rem;             /* taille de la flèche */
 }
+
+/* Optionnel : aligner visuellement le bas du bouton avec les inputs */
+.ctx-btn label {
+  visibility: hidden;             /* garde la même hauteur que les autres .ctx-item */
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* Mobile étroit : on conserve la lisibilité en autorisant le wrap */
+@media (max-width: 480px) {
+  .context-row {
+    gap: 10px;
+  }
+  .ctx-item--role select {
+    min-width: 10ch;
+  }
+  .ctx-item--hour input,
+  .ctx-item--min input {
+    width: 4.5ch;
+  }
+}
+
