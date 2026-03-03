@@ -77,7 +77,7 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
 /* Les champs heures / minutes : largeur compacte, mais lisible */
 .ctx-item--hour input,
 .ctx-item--min input {
-  width: 5ch;                     /* 2 chiffres + marge */
+  width: auto;                     /* 2 chiffres + marge */
   text-align: center;
 }
 
