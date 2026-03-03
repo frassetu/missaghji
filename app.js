@@ -117,8 +117,6 @@ function renderApp(){
           <div>
             <label for="hour">Heure</label>
             <input type="number" id="hour" min="0" max="23" value="${s.hour||hm.h}" />
-          </div>
-          <div>
             <label for="min">Minutes</label>
             <input type="number" id="min" min="0" max="59" value="${s.min||hm.m}" />
           </div>
