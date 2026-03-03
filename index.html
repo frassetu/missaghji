@@ -1,9 +1,41 @@
 
-<!DOCTYPE html><html lang='fr'><head><meta charset='UTF-8'><meta name=viewport content='width=device-width, initial-scale=1'>
-<title>PWA</title><link rel=stylesheet href=style.css><link rel=manifest href=manifest.json></head>
-<body><main class=card>
-<h1>ACCUEIL</h1>
-<form id=startForm>
-<label>Nom</label><input id=username required pattern='[A-Za-zÀ-ÖØ-öø-ÿ \-]+' />
-<label>Entité</label><select id=entity><option>BAO</option><option>BOBA</option></select>
-<button>Entrer</button></form></main><script src=app.js></script></body></html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Messagerie Opérationnelle – Accueil</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="screen">
+  <main class="card narrow">
+    <h1 class="title">MESSAGERIE OPÉRATIONNELLE</h1>
+    <form id="startForm" novalidate>
+      <label for="username">Nom (lettres, espaces et tirets uniquement)</label>
+      <input id="username" name="username" type="text"
+             autocomplete="off" autocapitalize="characters"
+             placeholder="Ex : MURACCIOLI STEPHANE"
+             pattern="^[A-Za-zÀ-ÖØ-öø-ÿ\-\s]+$" required />
+
+      <small class="hint">Le nom sera automatiquement converti en MAJUSCULES.</small>
+
+      <label for="entity">Entité</label>
+      <select id="entity" name="entity" required>
+        <option value="BAO">BAO</option>
+        <option value="BOBA">BOBA</option>
+        <option value="BOCC">BOCC</option>
+        <option value="BOES">BOES</option>
+        <option value="BOGA">BOGA</option>
+        <option value="BOGB">BOGB</option>
+        <option value="BOPO">BOPO</option>
+        <option value="BOVA">BOVA</option>
+      </select>
+
+      <button type="submit" class="btn primary">Entrer</button>
+    </form>
+  </main>
+  <script>window.APP_VERSION='v1.1.1';</script>
+  <script src="app.js"></script>
+</body>
+</html>

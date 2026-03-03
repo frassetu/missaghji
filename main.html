@@ -1,5 +1,32 @@
 
-<!DOCTYPE html><html lang='fr'><head><meta charset='UTF-8'><meta name=viewport content='width=device-width, initial-scale=1'>
-<title>Main</title><link rel=stylesheet href=style.css></head><body>
-<header id=topbar></header><div id=content></div>
-<script src=app.js></script></body></html>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Messagerie Opérationnelle</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="screen">
+  <header id="topbar" class="topbar"></header>
+  <div id="content" class="container"></div>
+
+  <!-- Menu overlay -->
+  <div id="menuOverlay" class="overlay hidden">
+    <div class="overlay-backdrop" id="overlayBackdrop"></div>
+    <aside class="drawer" role="dialog" aria-label="Menu">
+      <div class="drawer-header">
+        <strong>Menu</strong>
+        <button class="btn ghost sm" id="closeMenu" title="Fermer">✕</button>
+      </div>
+      <div class="drawer-content">
+        <button class="btn primary full" id="btnInstall">Installer le PWA</button>
+        <button class="btn full" id="btnHistory">Historique</button>
+        <button class="btn ghost full" id="btnChange">Changer entité</button>
+      </div>
+    </aside>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
