@@ -58,7 +58,7 @@ c.innerHTML=`
 <section class="card block">
   <h3>Émetteur <span class="badge">${meSide==='sender'?'MOI':''}</span></h3>
   <div class="row-num-name">
-    <input type="tel" inputmode="numeric" pattern="[0-9]*" id="enNum" min="1" max="999" value="${s.enNum||''}">
+    <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="enNum" min="1" max="999" value="${s.enNum||''}">
     ${meSide==='sender'?`<button class="num-btn" id="enGen">⟳</button>`:`<div></div>`}
     <input type="text" id="enName" value="${s.enName||''}">
   </div>
@@ -71,7 +71,7 @@ c.innerHTML=`
 <section class="card block">
   <h3>Récepteur <span class="badge">${meSide==='receiver'?'MOI':''}</span></h3>
   <div class="row-num-name">
-    <input type="tel" inputmode="numeric" pattern="[0-9]*" id="reNum" min="1" max="999" value="${s.reNum||''}">
+    <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="reNum" min="1" max="999" value="${s.reNum||''}">
     ${meSide==='receiver'?`<button class="num-btn" id="reGen">⟳</button>`:`<div></div>`}
     <input type="text" id="reName" value="${s.reName||''}">
   </div>
