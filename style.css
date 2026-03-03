@@ -1,31 +1,56 @@
 
-:root{ --bg:#FFFFFF; --text:#000000; --muted:#4d4d4d; --card:#F2F2F2; --accent:#FF8A00; --btn:#FF8A00; --btnText:#000; --line:#e3e3e3; }
+:root{
+  --bg:#FFFFFF; --text:#000000; --muted:#4d4d4d; --card:#F2F2F2;
+  --accent:#FF8A00; --btn:#FF8A00; --btnText:#000; --line:#e3e3e3;
+}
 *{box-sizing:border-box}
 html,body{height:100%}
 body.screen{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,Segoe UI,Roboto,Arial}
-input,select,textarea{font-size:16px;text-transform:uppercase}
+
+/* lisibilité mobile (pas de zoom) + majuscules par défaut */
+input,select,textarea{font-size:16px; text-transform:uppercase}
+
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);box-shadow:0 2px 6px #0002;position:sticky;top:0;z-index:10;border-bottom:1px solid var(--line)}
 .app-title{font-size:18px;font-weight:800;color:var(--text)}
 .app-title .version{color:var(--accent);margin-left:8px}
 .meta{font-size:12px;color:var(--muted)}
 .burger{font-size:22px;cursor:pointer;user-select:none}
+
 .container{padding:16px;max-width:1000px;margin:0 auto}
 .card{background:var(--card);border-radius:14px;padding:16px;box-shadow:0 6px 18px #0001;border:1px solid var(--line)}
 .card.narrow{max-width:460px;margin:40px auto}
 .title{margin:6px 0 12px;text-align:center;color:var(--text)}
+
 label{display:block;margin:12px 0 4px;color:var(--text)}
 .hint{display:block;color:var(--muted);font-size:12px;margin-top:4px}
-input,select,textarea{width:100%;max-width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--text);}
-textarea{min-height:120px;resize:vertical}
-.btn{padding:10px 14px;border:2px solid var(--text);border-radius:10px;background:#fff;color:var(--text);font-weight:800;cursor:pointer}
+
+/* largeur par défaut (modifiée localement pour les lignes flexibles) */
+input,select,textarea{
+  width:100%; max-width:100%;
+  padding:10px; border-radius:10px; border:1px solid var(--line);
+  background:#fff; color:var(--text);
+}
+
+textarea{
+  min-height:120px; resize:vertical;
+  text-transform:none; /* V1.3.3 : autorise minuscules dans le message */
+}
+
+.btn{
+  padding:10px 14px;border:2px solid var(--text);
+  border-radius:10px;background:#fff;color:var(--text);
+  font-weight:800;cursor:pointer
+}
 .btn:hover{box-shadow:0 2px 10px #0002}
 .btn.primary{background:var(--btn);color:var(--btnText);border-color:var(--text)}
 .btn.ghost{background:transparent}
 .btn.full{width:100%}
 .btn.sm{padding:6px 10px}
+
 .block{margin:16px 0}
 .block h3{margin:0 0 8px;color:var(--text)}
 .actions{display:flex;gap:10px;flex-wrap:wrap}
+
 pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:1px solid var(--line)}
 .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--accent);margin-left:8px;color:#000;font-weight:800}
 .small{font-size:12px;color:var(--muted)}
@@ -39,21 +64,57 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
 .drawer-header{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line)}
 .drawer-content{padding:14px;display:flex;flex-direction:column;gap:10px}
 
-/* Contexte en une ligne, mobile-proof */
-.context-row{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;width:100%}
+/* ---------- Contexte : une ligne, mobile-proof ---------- */
+.context-row{
+  display:flex;
+  align-items:flex-end;   /* V1.3.3 : aligne verticalement avec les champs */
+  gap:10px;
+  flex-wrap:nowrap;
+  width:100%;
+}
 .ctx-item{display:inline-flex;flex-direction:column;white-space:nowrap}
 .ctx-item--role select{width:auto;min-width:105px;max-width:160px}
-.ctx-item--hour input,.ctx-item--min input{width:55px;text-align:center}
-.ctx-btn .btn,.ctx-btn button{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;padding:0;font-size:24px;line-height:1}
+.ctx-item--hour input,.ctx-item--min input{
+  width:5.5ch;            /* ~3 chiffres + marge, stable mobile */
+  text-align:center
+}
+.ctx-btn .btn, .ctx-btn button{
+  display:flex; align-items:center; justify-content:center;
+  width:48px; height:48px; padding:0;
+  margin-bottom:4px;      /* V1.3.3 : ajuste l’alignement vertical */
+  font-size:24px; line-height:1
+}
 .ctx-btn label{visibility:hidden;height:0;margin:0;padding:0}
-@media(max-width:380px){.ctx-item--role select{min-width:95px;max-width:120px}.ctx-item--hour input,.ctx-item--min input{width:45px}.ctx-btn .btn{width:42px;height:42px}}
 
-/* N° + ⟳ + NOM */
-.row-num-name{display:grid;grid-template-columns:auto 50px 1fr;gap:12px;align-items:end}
-.row-num-name input[type="tel"]{text-align:center}
-.row-num-name .num-btn{display:inline-flex;align-items:center;justify-content:center;width:50px;height:44px;padding:0;font-size:1.4rem;border:2px solid var(--text);border-radius:10px;background:#fff;cursor:pointer}
+@media(max-width:380px){
+  .ctx-item--role select{min-width:95px;max-width:120px}
+  .ctx-item--hour input,.ctx-item--min input{width:4.5ch}
+  .ctx-btn .btn{width:42px;height:42px}
+}
+
+/* ---------- N° + ⟳ + NOM (3 colonnes adaptatives) ---------- */
+.row-num-name{
+  display:grid;
+  grid-template-columns:auto 50px 1fr;
+  gap:12px; align-items:end;
+}
+.row-num-name input[type="tel"]{
+  text-align:center;
+  width:5.5ch;            /* V1.3.3 : juste un peu plus que 3 chiffres */
+}
+.row-num-name .num-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:50px; height:44px; padding:0; font-size:1.4rem;
+  border:2px solid var(--text); border-radius:10px; background:#fff; cursor:pointer
+}
 .row-num-name .num-btn:active{transform:scale(.95)}
+.row-num-name input[type="text"]{
+  min-width:18ch;         /* V1.3.3 : ~≥ 15 caractères visibles */
+}
 
-/* Fonction + Entité */
-.row-func-ent{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
-.row-func-ent select,.row-func-ent input{width:100%}
+/* ---------- Fonction + Entité (2 colonnes) ---------- */
+.row-func-ent{
+  display:grid; grid-template-columns:1fr 1fr;
+  gap:12px; align-items:end
+}
+.row-func-ent select, .row-func-ent input{width:100%}

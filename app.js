@@ -3,7 +3,7 @@
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js')); }
 
 const BO_LIST=["BOBA","BOCC","BOES","BOGA","BOGB","BOPO","BOVA"]; const BO_FUNCS=["CDC","CDT","CDR","PDA","PDE","PDM","PDS"];
-const VERSION=window.APP_VERSION||'v1.3.2';
+const VERSION=window.APP_VERSION||'v1.3.3';
 const $=id=>document.getElementById(id);
 const lettersOnly=str=>(/^[A-Za-zÀ-ÖØ-öø-ÿ\-\s]+$/u).test((str||'').trim());
 const clampNum=n=>{n=parseInt(n||0,10); if(isNaN(n)||n<1) return 1; if(n>999) return 999; return n;};
@@ -83,30 +83,36 @@ c.innerHTML=`
 
 <section class="card block">
   <h3>Message</h3>
-  <textarea id="message" placeholder="ÉCRIRE LE MESSAGE...">${s.message||''}</textarea>
+  <textarea id="message" placeholder="Écrire le message...">${s.message||''}</textarea>
   <div class="actions">
     <button class="btn primary" id="btnSave">Valider</button>
     <button class="btn ghost" id="btnReset">Réinitialiser</button>
   </div>
 </section>`;
 
-  // Locks & options
   const enFuncEl=$('enFunc'); const reFuncEl=$('reFunc');
-  if(meSide==='sender'){ $('enName').value=(localStorage.getItem('username')||''); $('enName').disabled=true; enFuncEl.innerHTML=(localStorage.getItem('entity')==='BAO')?'<option value="CEX" selected>CEX</option>':BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join(''); enFuncEl.disabled=(localStorage.getItem('entity')==='BAO'); }
-  else { $('reName').value=(localStorage.getItem('username')||''); $('reName').disabled=true; reFuncEl.innerHTML=(localStorage.getItem('entity')==='BAO')?'<option value="CEX" selected>CEX</option>':BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join(''); reFuncEl.disabled=(localStorage.getItem('entity')==='BAO'); }
+  if(meSide==='sender'){
+    $('enName').value=(user); $('enName').disabled=true;
+    enFuncEl.innerHTML=(ent==='BAO')?'<option value="CEX" selected>CEX</option>':BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
+    enFuncEl.disabled=(ent==='BAO');
+  } else {
+    $('reName').value=(user); $('reName').disabled=true;
+    reFuncEl.innerHTML=(ent==='BAO')?'<option value="CEX" selected>CEX</option>':BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
+    reFuncEl.disabled=(ent==='BAO');
+  }
 
   function updateCorrFunc(which){ const entVal=(which==='sender'? $('enEnt').value : $('reEnt').value); const funcEl=(which==='sender'? enFuncEl : reFuncEl); if(entVal==='BAO'){ funcEl.innerHTML='<option value="CEX">CEX</option>'; funcEl.disabled=true; } else if(entVal==='DELCO'){ funcEl.innerHTML='<option value="CCO">CCO</option>'; funcEl.disabled=true; } else { funcEl.innerHTML=BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join(''); funcEl.disabled=false; } }
   if(meSide==='sender'){ if($('reEnt')&&$('reEnt').tagName==='SELECT'){ updateCorrFunc('receiver'); $('reEnt').addEventListener('change',()=>updateCorrFunc('receiver')); } }
   else { if($('enEnt')&&$('enEnt').tagName==='SELECT'){ updateCorrFunc('sender'); $('enEnt').addEventListener('change',()=>updateCorrFunc('sender')); } }
 
-  // Handlers
   $('btnNow').onclick=()=>{ const n=nowHM(); $('hour').value=n.h; $('min').value=n.m; };
   $('role').onchange=()=>{ captureState(); invertStateBetweenSides(); currentRole=$('role').value; renderApp(); };
   $('enGen')?.addEventListener('click',e=>{ e.preventDefault(); $('enNum').value=nextNum(); });
   $('reGen')?.addEventListener('click',e=>{ e.preventDefault(); $('reNum').value=nextNum(); });
 
+  // V1.3.3 : uppercase uniquement sur les NOMS, pas sur le message
   applyLettersOnly(['enName','reName']);
-  applyUppercaseLive(['enName','reName','message']);
+  applyUppercaseLive(['enName','reName']);
 
   $('btnSave').onclick=e=>{ e.preventDefault(); saveMessage(); };
   $('btnReset').onclick=e=>{ e.preventDefault(); state=null; renderApp(); };
@@ -117,7 +123,7 @@ function saveMessage(){ const rec={ date:new Date().toLocaleDateString('fr-FR'),
   const userEnt=localStorage.getItem('entity')||''; const corrEnt=(currentRole==='Émetteur')?rec.re_ent:rec.em_ent; if(isBO(userEnt)){ if(!(corrEnt==='BAO'||corrEnt==='DELCO')){ alert('Si vous êtes une BO, le correspondant doit être BAO ou DELCO.'); return; } } else { if(!(BO_LIST.includes(corrEnt)||corrEnt==='DELCO')){ alert('Si vous êtes BAO, le correspondant doit être une BO ou DELCO.'); return; } }
   const list=JSON.parse(localStorage.getItem('history')||'[]'); list.push(rec); localStorage.setItem('history',JSON.stringify(list)); alert('Message Validé'); state=null; renderApp(); }
 
-function showHistory(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const c=$('content'); if(list.length===0){ c.innerHTML=`<section class="card"><h2>Historique</h2><p>Aucun message enregistré.</p><div class="actions"><button class="btn" id="back">Retour</button></div></section>`; $('back').onclick=()=>renderApp(); return; } const out=list.map(x=>`${x.date} ${x.time}\nÉmetteur: N° ${x.em_num} | ${x.em_name} | ${x.em_func} | ${x.em_ent}\nRécepteur: N° ${x.re_num} | ${x.re_name} | ${x.re_func} | ${x.re_ent}\n${x.msg}\n-----`).join("\n"); c.innerHTML=`<section class="card"><h2>Historique</h2><pre>${out}</pre><div class="actions"><button class="btn primary" id="exportCsv">Exporter CSV</button><button class="btn" id="back">Retour</button></div></section>`; $('back').onclick=()=>renderApp(); $('exportCsv').onclick=exportCSV; bindMenuActions(); }
+function showHistory(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const c=$('content'); if(list.length===0){ c.innerHTML=`<section class="card"><h2>Historique</h2><p>Aucun message enregistré.</p><div class="actions"><button class="btn" id="back">Retour</button></div></section>`; $('back').onclick=()=>renderApp(); return; } const out=list.map(x=>`${x.date} ${x.time}\nÉmetteur: N° ${x.em_num} | ${x.em_name} | ${x.em_func} | ${x.em_ent}\nRécepteur: N° ${x.re_num} | ${x.re_name} | ${x.re_func} | ${x.re_ent}\n${x.msg}\n-----`).join("\n"); c.innerHTML=`<section class="card"><h2>Historique</h2><pre>${out}</pre><div class="actions"><button class="btn primary" id="exportCsv">Exporter CSV</button><button class="btn ghost" id="clearHistory">Supprimer tout</button><button class="btn" id="back">Retour</button></div></section>`; $('back').onclick=()=>renderApp(); $('exportCsv').onclick=exportCSV; $('clearHistory').onclick=()=>{ if(confirm("Voulez-vous vraiment supprimer tout l'historique ?")){ localStorage.removeItem('history'); renderApp(); } }; bindMenuActions(); }
 
 function exportCSV(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const sep=';'; const headers=['Date','Heure','Rôle','N° Emetteur','Nom Emetteur','Fonction Emetteur','Entité Emetteur','N° Recepteur','Nom Recepteur','Fonction Recepteur','Entité Recepteur','Message']; const rows=list.map(x=>[x.date,x.time,x.role,x.em_num,x.em_name,x.em_func,x.em_ent,x.re_num,x.re_name,x.re_func,x.re_ent,(x.msg||'').replace(/\r?\n/g,' ')]); const csv=['\ufeff'+headers.join(sep)].concat(rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(sep))).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='historique_messages.csv'; document.body.appendChild(a); a.click(); a.remove(); }
 
