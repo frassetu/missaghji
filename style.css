@@ -46,6 +46,11 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
 .drawer-content{padding:14px;display:flex;flex-direction:column;gap:10px}
 
 
+/* Autoriser le rôle à prendre plus de place si besoin */
+.context-row .ctx-item--role {
+  flex: 1 1 auto;     /* s’étire si la place existe, sinon garde sa taille */
+}
+
 
 /* --- Contexte : mise en ligne adaptative --- */
 .context-row {
@@ -109,5 +114,35 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
   .ctx-item--min input {
     width: 4.5ch;
   }
+}
+
+/* --- Ligne N° + ⟳ + NOM --- */
+.row-num-name {
+  display: grid;
+  grid-template-columns: auto 50px 1fr; 
+  gap: 12px;
+  align-items: end;
+}
+
+.row-num-name input[type="tel"] {
+  text-align: center;
+}
+
+.row-num-name .num-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 44px;
+  padding: 0;
+  font-size: 1.4rem;
+  border: 2px solid var(--text);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.row-num-name .num-btn:active {
+  transform: scale(0.95);
 }
 
