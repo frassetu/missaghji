@@ -1,247 +1,129 @@
+
 // PWA registration
 if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js')); }
 
-const BO_LIST=["BOBA","BOCC","BOES","BOGA","BOGB","BOPO","BOVA"];
-const BO_FUNCS=["CDC","CDT","CDR","PDA","PDE","PDM","PDS"];
+const BO_LIST=["BOBA","BOCC","BOES","BOGA","BOGB","BOPO","BOVA"]; const BO_FUNCS=["CDC","CDT","CDR","PDA","PDE","PDM","PDS"];
 const VERSION=window.APP_VERSION||'v1.3.3';
-
 const $=id=>document.getElementById(id);
-
 const lettersOnly=str=>(/^[A-Za-zÀ-ÖØ-öø-ÿ\-\s]+$/u).test((str||'').trim());
-
-const clampNum=n=>{
-  n=parseInt(n||0,10);
-  if(isNaN(n)||n<1) return 1;
-  if(n>999) return 999;
-  return n;
-};
-
-const nextNum=()=>{
-  let n=parseInt(localStorage.getItem('num')||'0',10);
-  n=n>=999?1:n+1;
-  localStorage.setItem('num',String(n));
-  return n;
-};
-
-const nowHM=()=>{
-  const d=new Date();
-  return {
-    h:String(d.getHours()).padStart(2,'0'),
-    m:String(d.getMinutes()).padStart(2,'0')
-  };
-};
-
+const clampNum=n=>{n=parseInt(n||0,10); if(isNaN(n)||n<1) return 1; if(n>999) return 999; return n;};
+const nextNum=()=>{let n=parseInt(localStorage.getItem('num')||'0',10); n=n>=999?1:n+1; localStorage.setItem('num',String(n)); return n;};
+const nowHM=()=>{const d=new Date(); return {h:String(d.getHours()).padStart(2,'0'), m:String(d.getMinutes()).padStart(2,'0')}};
 const isBO=ent=>BO_LIST.includes(ent);
+const allowedCorrespondentEntities=userEnt=> isBO(userEnt)? ['BAO','DELCO'] : BO_LIST.concat(['DELCO']);
 
-const allowedCorrespondentEntities=userEnt=>
-  isBO(userEnt)? ['BAO','DELCO'] : BO_LIST.concat(['DELCO']);
+function setupStart(){ const form=$('startForm'); if(!form) return; const input=$('username'); input.addEventListener('input',()=>{ input.value=input.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,'').toUpperCase(); }); form.addEventListener('submit',e=>{ e.preventDefault(); const name=(input.value||'').trim(); if(!name||!lettersOnly(name)) return alert('Le nom ne doit contenir que des lettres, espaces et tirets.'); const ent=$('entity').value; localStorage.setItem('username',name.toUpperCase()); localStorage.setItem('entity',ent); if(!localStorage.getItem('num')) localStorage.setItem('num','0'); localStorage.setItem('version',VERSION); location.href='main.html'; }); }
 
+let currentRole='Émetteur'; let state=null;
+function captureState(){ const get=id=>$(id)?$(id).value:''; state={ hour:get('hour'), min:get('min'), enNum:get('enNum'), enName:get('enName'), enFunc:get('enFunc'), enEnt:get('enEnt'), reNum:get('reNum'), reName:get('reName'), reFunc:get('reFunc'), reEnt:get('reEnt'), message:get('message') }; }
+function invertStateBetweenSides(){ if(!state) return; const s=state; [s.enNum,s.reNum]=[s.reNum,s.enNum]; [s.enName,s.reName]=[s.reName,s.enName]; [s.enFunc,s.reFunc]=[s.reFunc,s.enFunc]; [s.enEnt,s.reEnt]=[s.reEnt,s.enEnt]; }
+function applyUppercaseLive(ids){ ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value=(el.value||'').toUpperCase(); }); }); }
+function applyLettersOnly(ids){ ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value=el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,''); }); }); }
 
-// ✅ BLOQUER LES LETTRES DANS LES CHAMPS NUMÉRIQUES
-function applyNumericOnly(ids){
-  ids.forEach(id=>{
-    const el=$(id);
-    if(!el) return;
-    el.addEventListener('input',()=>{
-      el.value=el.value.replace(/[^0-9]/g,'');
-    });
-  });
-}
+function toggleMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.toggle('hidden'); }
+function closeMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.add('hidden'); }
+function bindMenuActions(){ const install=()=>{ if(window.deferredPrompt){ window.deferredPrompt.prompt(); window.deferredPrompt=null; } else alert('Installation non disponible.'); }; $('btnInstall')?.addEventListener('click',()=>{ closeMenu(); install(); }); $('btnHistory')?.addEventListener('click',()=>{ closeMenu(); showHistory(); }); $('btnChange')?.addEventListener('click',()=>{ closeMenu(); location.href='index.html'; }); }
 
-function setupStart(){
-  const form=$('startForm');
-  if(!form) return;
+function setupMain(){ if(!$('topbar')) return; const user=localStorage.getItem('username')||''; const ent=localStorage.getItem('entity')||''; $('topbar').innerHTML=`<div><div class="app-title">CARNETTU DI MISSAGHJI<span class="version">${localStorage.getItem('version')||VERSION}</span></div><div class="meta">${user} (${ent})</div></div><div class="burger" id="burger">☰</div>`; $('burger').addEventListener('click',toggleMenu); $('overlayBackdrop')?.addEventListener('click',closeMenu); $('closeMenu')?.addEventListener('click',closeMenu); renderApp(); bindMenuActions(); }
+window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); window.deferredPrompt=e; });
 
-  const input=$('username');
+function renderApp(){ const user=localStorage.getItem('username')||''; const ent=localStorage.getItem('entity')||''; const c=$('content'); const hm=nowHM(); const s=state||{}; const meSide=(currentRole==='Émetteur')?'sender':'receiver'; const corrOptions=allowedCorrespondentEntities(ent); const optionsCorr=corrOptions.map(x=>`<option value="${x}" ${s[(meSide==='sender')?'reEnt':'enEnt']===x?'selected':''}>${x}</option>`).join('');
 
-  input.addEventListener('input',()=>{
-    input.value=input.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,'').toUpperCase();
-  });
-
-  form.addEventListener('submit',e=>{
-    e.preventDefault();
-
-    const name=(input.value||'').trim();
-    if(!name||!lettersOnly(name)) return alert('Le nom ne doit contenir que des lettres, espaces et tirets.');
-
-    const ent=$('entity').value;
-
-    localStorage.setItem('username',name.toUpperCase());
-    localStorage.setItem('entity',ent);
-
-    if(!localStorage.getItem('num')) localStorage.setItem('num','0');
-
-    localStorage.setItem('version',VERSION);
-
-    location.href='main.html';
-  });
-}
-
-
-// ✅ FIX rôle
-let currentRole='Emettori';
-
-let state=null;
-
-function captureState(){
-  const get=id=>$(id)?$(id).value:'';
-  state={
-    hour:get('hour'),
-    min:get('min'),
-    enNum:get('enNum'),
-    enName:get('enName'),
-    enFunc:get('enFunc'),
-    enEnt:get('enEnt'),
-    reNum:get('reNum'),
-    reName:get('reName'),
-    reFunc:get('reFunc'),
-    reEnt:get('reEnt'),
-    message:get('message')
-  };
-}
-
-function applyUppercaseLive(ids){
-  ids.forEach(id=>{
-    const el=$(id);
-    if(!el) return;
-    el.addEventListener('input',()=>{
-      el.value=(el.value||'').toUpperCase();
-    });
-  });
-}
-
-function applyLettersOnly(ids){
-  ids.forEach(id=>{
-    const el=$(id);
-    if(!el) return;
-    el.addEventListener('input',()=>{
-      el.value=el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,'');
-    });
-  });
-}
-
-
-function toggleMenu(){
-  const o=$('menuOverlay');
-  if(!o) return;
-  o.classList.toggle('hidden');
-}
-
-function closeMenu(){
-  const o=$('menuOverlay');
-  if(!o) return;
-  o.classList.add('hidden');
-}
-
-
-function bindMenuActions(){
-  const install=()=>{
-    if(window.deferredPrompt){
-      window.deferredPrompt.prompt();
-      window.deferredPrompt=null;
-    } else {
-      alert('Installation non disponible.');
-    }
-  };
-
-  $('btnInstall')?.addEventListener('click',()=>{
-    closeMenu();
-    install();
-  });
-
-  $('btnHistory')?.addEventListener('click',()=>{
-    closeMenu();
-    showHistory();
-  });
-
-  $('btnChange')?.addEventListener('click',()=>{
-    closeMenu();
-    location.href='index.html';
-  });
-}
-
-
-function setupMain(){
-  if(!$('topbar')) return;
-
-  const user=localStorage.getItem('username')||'';
-  const ent=localStorage.getItem('entity')||'';
-
-  $('topbar').innerHTML=`
-    <div>
-      <div class="app-title">
-        CARNETTU DI MISSAGHJI
-        <span class="version">${localStorage.getItem('version')||VERSION}</span>
-      </div>
-      <div class="meta">${user} (${ent})</div>
+c.innerHTML=`
+<section class="card block">
+  <div class="context-row">
+    <div class="ctx-item ctx-item--role">
+      <label for="role">Funzioni</label>
+      <select id="role">
+        <option ${currentRole==='Émetteur'?'selected':''}>Emettori</option>
+        <option ${currentRole==='Récepteur'?'selected':''}>Ricivitori</option>
+      </select>
     </div>
-    <div class="burger" id="burger">☰</div>
-  `;
-
-  $('burger').addEventListener('click',toggleMenu);
-  $('overlayBackdrop')?.addEventListener('click',closeMenu);
-  $('closeMenu')?.addEventListener('click',closeMenu);
-
-  renderApp();
-  bindMenuActions();
-}
-
-window.addEventListener('beforeinstallprompt',e=>{
-  e.preventDefault();
-  window.deferredPrompt=e;
-});
-
-
-function renderApp(){
-
-  const user=localStorage.getItem('username')||'';
-  const ent=localStorage.getItem('entity')||'';
-
-  const c=$('content');
-  const hm=nowHM();
-  const s=state||{};
-
-  const meSide=(currentRole==='Emettori')?'sender':'receiver';
-
-  const corrOptions=allowedCorrespondentEntities(ent);
-
-  const optionsCorr=corrOptions.map(x=>
-    `<option value="${x}" ${s[(meSide==='sender')?'reEnt':'enEnt']===x?'selected':''}>${x}</option>`
-  ).join('');
-
-  c.innerHTML=`
-  <section class="card block">
-
-  <div class="ctx-item ctx-item--role">
-    <label>Funzioni</label>
-    <select id="role">
-      <option value="Emettori" ${currentRole==='Emettori'?'selected':''}>Emettori</option>
-      <option value="Ricivitori" ${currentRole==='Ricivitori'?'selected':''}>Ricivitori</option>
-    </select>
+    <div class="ctx-item ctx-item--hour">
+      <label for="hour">Ora</label>
+      <input type="tel" inputmode="numeric" pattern="[0-9]*" id="hour" min="0" max="23" value="${s.hour||hm.h}" />
+    </div>
+    <div class="ctx-item ctx-item--min">
+      <label for="min">Minuta</label>
+      <input type="tel" inputmode="numeric" pattern="[0-9]*" id="min" min="0" max="59" value="${s.min||hm.m}" />
+    </div>
+    <div class="ctx-item ctx-btn">
+      <label>&nbsp;</label>
+      <button class="btn icon-btn" id="btnNow" title="Attualizà">⟳</button>
+    </div>
   </div>
-  `;
+</section>
 
-  // ✅ FIX onchange (plus d’inversion)
-  $('role').onchange=()=>{
-    captureState();
-    currentRole=$('role').value;
-    renderApp();
-  };
+<section class="card block">
+  <h3>Emettori <span class="badge">${meSide==='sender'?'EIU':''}</span></h3>
+  <div class="row-num-name">
+    <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="enNum" min="1" max="999" value="${s.enNum||''}">
+    ${meSide==='sender'?`<button class="num-btn" id="enGen">⟳</button>`:`<div></div>`}
+    <input type="text" id="enName" value="${s.enName||''}">
+  </div>
+  <div class="row-func-ent">
+    <select id="enFunc"></select>
+    ${meSide==='sender'?`<input type="text" id="enEnt" value="${ent}" disabled>`:`<select id="enEnt">${optionsCorr}</select>`}
+  </div>
+</section>
 
-  // ✅ activation bloc chiffres
-  applyNumericOnly(['hour','min','enNum','reNum']);
+<section class="card block">
+  <h3>Ricivitori <span class="badge">${meSide==='receiver'?'EIU':''}</span></h3>
+  <div class="row-num-name">
+    <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="reNum" min="1" max="999" value="${s.reNum||''}">
+    ${meSide==='receiver'?`<button class="num-btn" id="reGen">⟳</button>`:`<div></div>`}
+    <input type="text" id="reName" value="${s.reName||''}">
+  </div>
+  <div class="row-func-ent">
+    <select id="reFunc"></select>
+    ${meSide==='receiver'?`<input type="text" id="reEnt" value="${ent}" disabled>`:`<select id="reEnt">${optionsCorr}</select>`}
+  </div>
+</section>
 
+<section class="card block">
+  <h3>Missaghju</h3>
+  <textarea id="message" placeholder="Scriva u missaghju">${s.message||''}</textarea>
+  <div class="actions">
+    <button class="btn primary" id="btnSave">Validà</button>
+    <button class="btn ghost" id="btnReset">Rinizializà</button>
+  </div>
+</section>`;
+
+  const enFuncEl=$('enFunc'); const reFuncEl=$('reFunc');
+  if(meSide==='sender'){
+    $('enName').value=(user); $('enName').disabled=true;
+    enFuncEl.innerHTML=(ent==='BAO')?'<option value="CEX" selected>CEX</option>':BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
+    enFuncEl.disabled=(ent==='BAO');
+  } else {
+    $('reName').value=(user); $('reName').disabled=true;
+    reFuncEl.innerHTML=(ent==='BAO')?'<option value="CEX" selected>CEX</option>':BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join('');
+    reFuncEl.disabled=(ent==='BAO');
+  }
+
+  function updateCorrFunc(which){ const entVal=(which==='sender'? $('enEnt').value : $('reEnt').value); const funcEl=(which==='sender'? enFuncEl : reFuncEl); if(entVal==='BAO'){ funcEl.innerHTML='<option value="CEX">CEX</option>'; funcEl.disabled=true; } else if(entVal==='DELCO'){ funcEl.innerHTML='<option value="CCO">CCO</option>'; funcEl.disabled=true; } else { funcEl.innerHTML=BO_FUNCS.map(f=>`<option value="${f}">${f}</option>`).join(''); funcEl.disabled=false; } }
+  if(meSide==='sender'){ if($('reEnt')&&$('reEnt').tagName==='SELECT'){ updateCorrFunc('receiver'); $('reEnt').addEventListener('change',()=>updateCorrFunc('receiver')); } }
+  else { if($('enEnt')&&$('enEnt').tagName==='SELECT'){ updateCorrFunc('sender'); $('enEnt').addEventListener('change',()=>updateCorrFunc('sender')); } }
+
+  $('btnNow').onclick=()=>{ const n=nowHM(); $('hour').value=n.h; $('min').value=n.m; };
+  $('role').onchange=()=>{ captureState(); invertStateBetweenSides(); currentRole=$('role').value; renderApp(); };
+  $('enGen')?.addEventListener('click',e=>{ e.preventDefault(); $('enNum').value=nextNum(); });
+  $('reGen')?.addEventListener('click',e=>{ e.preventDefault(); $('reNum').value=nextNum(); });
+
+  // V1.3.3 : uppercase uniquement sur les NOMS, pas sur le message
   applyLettersOnly(['enName','reName']);
   applyUppercaseLive(['enName','reName']);
+
+  $('btnSave').onclick=e=>{ e.preventDefault(); saveMessage(); };
+  $('btnReset').onclick=e=>{ e.preventDefault(); state=null; renderApp(); };
 }
 
+function saveMessage(){ const rec={ date:new Date().toLocaleDateString('fr-FR'), time:`${$('hour').value.toString().padStart(2,'0')}:${$('min').value.toString().padStart(2,'0')}`, role:$('role').value, em_num:String(clampNum($('enNum').value||nextNum())), em_name:$('enName').value.trim(), em_func:$('enFunc').value, em_ent:$('enEnt').value, re_num:String(clampNum($('reNum').value||'')), re_name:$('reName').value.trim(), re_func:$('reFunc').value, re_ent:$('reEnt').value, msg:$('message').value.trim() };
+  if(!lettersOnly(rec.em_name)||!lettersOnly(rec.re_name)){ alert('I casati ponu avè solu letteri'); return; }
+  const userEnt=localStorage.getItem('entity')||''; const corrEnt=(currentRole==='Émetteur')?rec.re_ent:rec.em_ent; if(isBO(userEnt)){ if(!(corrEnt==='BAO'||corrEnt==='DELCO')){ alert('Sì voi seti di una BO, u curespundanti devi essa u BAO o DELCO.'); return; } } else { if(!(BO_LIST.includes(corrEnt)||corrEnt==='DELCO')){ alert('Sì voi seti di u BAO, u curespundanti devi essa una BO o DELCO.'); return; } }
+  const list=JSON.parse(localStorage.getItem('history')||'[]'); list.push(rec); localStorage.setItem('history',JSON.stringify(list)); alert('Missaghju Validatu'); state=null; renderApp(); }
 
-function saveMessage(){
-  const rec={
-    role:$('role').value
-  };
+function showHistory(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const c=$('content'); if(list.length===0){ c.innerHTML=`<section class="card"><h2>Storicu</h2><p>Nisunu missaghju arrigistratu.</p><div class="actions"><button class="btn" id="back">Ritornu</button></div></section>`; $('back').onclick=()=>renderApp(); return; } const out=list.map(x=>`${x.date} ${x.time}\nEmettori: N° ${x.em_num} | ${x.em_name} | ${x.em_func} | ${x.em_ent}\nRicivitori: N° ${x.re_num} | ${x.re_name} | ${x.re_func} | ${x.re_ent}\n${x.msg}\n-----`).join("\n"); c.innerHTML=`<section class="card"><h2>Storicu</h2><pre>${out}</pre><div class="actions"><button class="btn primary" id="exportCsv">Spurtà in CSV</button><button class="btn ghost" id="clearHistory">Sguassà tuttu</button><button class="btn" id="back">Ritornu</button></div></section>`; $('back').onclick=()=>renderApp(); $('exportCsv').onclick=exportCSV; $('clearHistory').onclick=()=>{ if(confirm("Seti sicuru di sguassà tuttu ?")){ localStorage.removeItem('history'); renderApp(); } }; bindMenuActions(); }
 
-  const userEnt=localStorage.getItem('entity')||'';
+function exportCSV(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const sep=';'; const headers=['Data','Ora','Funzioni','N° Emettori','Casata Emettori','Funzioni Emettori','Entità Emettori','N° Ricivitori','Casata Ricivitori','Funzioni Ricivitori','Entità Ricivitori','Missaghju']; const rows=list.map(x=>[x.date,x.time,x.role,x.em_num,x.em_name,x.em_func,x.em_ent,x.re_num,x.re_name,x.re_func,x.re_ent,(x.msg||'').replace(/\r?\n/g,' ')]); const csv=['\ufeff'+headers.join(sep)].concat(rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(sep))).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='historique_messages.csv'; document.body.appendChild(a); a.click(); a.remove(); }
 
-  const corrEnt=(currentRole==='Emettori') ? 'receiver' : 'sender';
-}
+document.addEventListener('DOMContentLoaded',()=>{ if($('startForm')) setupStart(); else setupMain(); });
