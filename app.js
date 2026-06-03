@@ -24,7 +24,7 @@ function toggleMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.togg
 function closeMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.add('hidden'); }
 function bindMenuActions(){ const install=()=>{ if(window.deferredPrompt){ window.deferredPrompt.prompt(); window.deferredPrompt=null; } else alert('Installation non disponible.'); }; $('btnInstall')?.addEventListener('click',()=>{ closeMenu(); install(); }); $('btnHistory')?.addEventListener('click',()=>{ closeMenu(); showHistory(); }); $('btnChange')?.addEventListener('click',()=>{ closeMenu(); location.href='index.html'; }); }
 
-function setupMain(){ if(!$('topbar')) return; const user=localStorage.getItem('username')||''; const ent=localStorage.getItem('entity')||''; $('topbar').innerHTML=`<div><div class="app-title">MESSAGERIE OPÉRATIONNELLE <span class="version">${localStorage.getItem('version')||VERSION}</span></div><div class="meta">${user} (${ent})</div></div><div class="burger" id="burger">☰</div>`; $('burger').addEventListener('click',toggleMenu); $('overlayBackdrop')?.addEventListener('click',closeMenu); $('closeMenu')?.addEventListener('click',closeMenu); renderApp(); bindMenuActions(); }
+function setupMain(){ if(!$('topbar')) return; const user=localStorage.getItem('username')||''; const ent=localStorage.getItem('entity')||''; $('topbar').innerHTML=`<div><div class="app-title">CARNETTU DI MESSAGHJI<span class="version">${localStorage.getItem('version')||VERSION}</span></div><div class="meta">${user} (${ent})</div></div><div class="burger" id="burger">☰</div>`; $('burger').addEventListener('click',toggleMenu); $('overlayBackdrop')?.addEventListener('click',closeMenu); $('closeMenu')?.addEventListener('click',closeMenu); renderApp(); bindMenuActions(); }
 window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); window.deferredPrompt=e; });
 
 function renderApp(){ const user=localStorage.getItem('username')||''; const ent=localStorage.getItem('entity')||''; const c=$('content'); const hm=nowHM(); const s=state||{}; const meSide=(currentRole==='Émetteur')?'sender':'receiver'; const corrOptions=allowedCorrespondentEntities(ent); const optionsCorr=corrOptions.map(x=>`<option value="${x}" ${s[(meSide==='sender')?'reEnt':'enEnt']===x?'selected':''}>${x}</option>`).join('');
@@ -55,7 +55,7 @@ c.innerHTML=`
 </section>
 
 <section class="card block">
-  <h3>Emettori <span class="badge">${meSide==='sender'?'MOI':''}</span></h3>
+  <h3>Emettori <span class="badge">${meSide==='sender'?'EIU':''}</span></h3>
   <div class="row-num-name">
     <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="enNum" min="1" max="999" value="${s.enNum||''}">
     ${meSide==='sender'?`<button class="num-btn" id="enGen">⟳</button>`:`<div></div>`}
@@ -68,7 +68,7 @@ c.innerHTML=`
 </section>
 
 <section class="card block">
-  <h3>Récepteur <span class="badge">${meSide==='receiver'?'MOI':''}</span></h3>
+  <h3>Ricevitori <span class="badge">${meSide==='receiver'?'EIU':''}</span></h3>
   <div class="row-num-name">
     <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="reNum" min="1" max="999" value="${s.reNum||''}">
     ${meSide==='receiver'?`<button class="num-btn" id="reGen">⟳</button>`:`<div></div>`}
