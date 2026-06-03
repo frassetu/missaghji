@@ -37,7 +37,7 @@ textarea{
 }
 
 .btn{
-  padding:10px 14px;border:2px solid var(--text);
+  padding:10px 14px;border:1px solid var(--text);
   border-radius:10px;background:#fff;color:var(--text);
   font-weight:800;cursor:pointer
 }
@@ -104,7 +104,7 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
 }
 .row-num-name .num-btn{
   display:inline-flex; align-items:center; justify-content:center;
-  width:50px; height:44px; padding:0; font-size:1.4rem;
+  width:42px; height:42px; padding:0; font-size:1.4rem;
   border:2px solid var(--text); border-radius:10px; background:#fff; cursor:pointer
 }
 .row-num-name .num-btn:active{transform:scale(.95)}
