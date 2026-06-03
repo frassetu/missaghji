@@ -1,7 +1,7 @@
 
 {
-  "name": "Messagerie Opérationnelle",
-  "short_name": "MsgOP",
+  "name": "Carnettu di Missaghji",
+  "short_name": "Missaghji",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#FFFFFF",
