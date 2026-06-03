@@ -27,7 +27,7 @@ label{display:block;margin:4px 0 4px;color:var(--text)}
 /* largeur par défaut (modifiée localement pour les lignes flexibles) */
 input,select,textarea{
   width:100%; max-width:100%;
-  padding:10px; border-radius:10px; border:1px solid var(--line);
+  padding:10px; border-radius:10px; border:2px solid var(--line);
   background:#fff; color:var(--text);
 }
 
@@ -80,7 +80,7 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
 }
 .ctx-btn .btn, .ctx-btn button{
   display:flex; align-items:center; justify-content:center;
-  width:42px; height:42px; padding:0;
+  width:42px; height:40px; padding:0;
   margin:0px;      /* V1.3.3 : ajuste l’alignement vertical */
   font-size:22px; line-height:1
 }
@@ -104,7 +104,7 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
 }
 .row-num-name .num-btn{
   display:inline-flex; align-items:center; justify-content:center;
-  width:42px; height:42px; padding:0; font-size:1.4rem;
+  width:42px; height:40px; padding:0; font-size:1.4rem;
   border:2px solid var(--text); border-radius:10px; background:#fff; cursor:pointer
 }
 .row-num-name .num-btn:active{transform:scale(.95)}
