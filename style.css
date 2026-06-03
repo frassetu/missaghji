@@ -37,7 +37,7 @@ textarea{
 }
 
 .btn{
-  padding:10px 14px;border:1px solid var(--text);
+  padding:10px 14px;border:2px solid var(--text);
   border-radius:10px;background:#fff;color:var(--text);
   font-weight:800;cursor:pointer
 }
