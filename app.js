@@ -31,32 +31,31 @@ function renderApp(){ const user=localStorage.getItem('username')||''; const ent
 
 c.innerHTML=`
 <section class="card block">
-  <h3>Contexte</h3>
   <div class="context-row">
     <div class="ctx-item ctx-item--role">
-      <label for="role">Rôle</label>
+      <label for="role">Funzioni</label>
       <select id="role">
-        <option ${currentRole==='Émetteur'?'selected':''}>Émetteur</option>
-        <option ${currentRole==='Récepteur'?'selected':''}>Récepteur</option>
+        <option value="Émetteur" ${currentRole==='Émetteur'?'selected':''}>Emettori</option>
+        <option value="Récepteur" ${currentRole==='Récepteur'?'selected':''}>Ricevitori</option>
       </select>
     </div>
     <div class="ctx-item ctx-item--hour">
-      <label for="hour">Heure</label>
+      <label for="hour">Ori</label>
       <input type="tel" inputmode="numeric" pattern="[0-9]*" id="hour" min="0" max="23" value="${s.hour||hm.h}" />
     </div>
     <div class="ctx-item ctx-item--min">
-      <label for="min">Minutes</label>
+      <label for="min">Minuti</label>
       <input type="tel" inputmode="numeric" pattern="[0-9]*" id="min" min="0" max="59" value="${s.min||hm.m}" />
     </div>
     <div class="ctx-item ctx-btn">
       <label>&nbsp;</label>
-      <button class="btn icon-btn" id="btnNow" title="Actualiser">⟳</button>
+      <button class="btn icon-btn" id="btnNow" title="Attualizà">⟳</button>
     </div>
   </div>
 </section>
 
 <section class="card block">
-  <h3>Émetteur <span class="badge">${meSide==='sender'?'MOI':''}</span></h3>
+  <h3>Emettori <span class="badge">${meSide==='sender'?'MOI':''}</span></h3>
   <div class="row-num-name">
     <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="enNum" min="1" max="999" value="${s.enNum||''}">
     ${meSide==='sender'?`<button class="num-btn" id="enGen">⟳</button>`:`<div></div>`}
@@ -82,11 +81,11 @@ c.innerHTML=`
 </section>
 
 <section class="card block">
-  <h3>Message</h3>
-  <textarea id="message" placeholder="Écrire le message...">${s.message||''}</textarea>
+  <h3>Missaghju</h3>
+  <textarea id="message" placeholder="Scriva u missaghju">${s.message||''}</textarea>
   <div class="actions">
-    <button class="btn primary" id="btnSave">Valider</button>
-    <button class="btn ghost" id="btnReset">Réinitialiser</button>
+    <button class="btn primary" id="btnSave">Validà</button>
+    <button class="btn ghost" id="btnReset">Rinizialisà</button>
   </div>
 </section>`;
 
@@ -119,12 +118,12 @@ c.innerHTML=`
 }
 
 function saveMessage(){ const rec={ date:new Date().toLocaleDateString('fr-FR'), time:`${$('hour').value.toString().padStart(2,'0')}:${$('min').value.toString().padStart(2,'0')}`, role:$('role').value, em_num:String(clampNum($('enNum').value||nextNum())), em_name:$('enName').value.trim(), em_func:$('enFunc').value, em_ent:$('enEnt').value, re_num:String(clampNum($('reNum').value||'')), re_name:$('reName').value.trim(), re_func:$('reFunc').value, re_ent:$('reEnt').value, msg:$('message').value.trim() };
-  if(!lettersOnly(rec.em_name)||!lettersOnly(rec.re_name)){ alert('Les noms ne doivent contenir que des lettres, espaces et tirets.'); return; }
-  const userEnt=localStorage.getItem('entity')||''; const corrEnt=(currentRole==='Émetteur')?rec.re_ent:rec.em_ent; if(isBO(userEnt)){ if(!(corrEnt==='BAO'||corrEnt==='DELCO')){ alert('Si vous êtes une BO, le correspondant doit être BAO ou DELCO.'); return; } } else { if(!(BO_LIST.includes(corrEnt)||corrEnt==='DELCO')){ alert('Si vous êtes BAO, le correspondant doit être une BO ou DELCO.'); return; } }
-  const list=JSON.parse(localStorage.getItem('history')||'[]'); list.push(rec); localStorage.setItem('history',JSON.stringify(list)); alert('Message Validé'); state=null; renderApp(); }
+  if(!lettersOnly(rec.em_name)||!lettersOnly(rec.re_name)){ alert('I casati devini cuntena soli letteri.'); return; }
+  const userEnt=localStorage.getItem('entity')||''; const corrEnt=(currentRole==='Émetteur')?rec.re_ent:rec.em_ent; if(isBO(userEnt)){ if(!(corrEnt==='BAO'||corrEnt==='DELCO')){ alert('Sè voi seti una BO, u currispundanti devi essa BAO o DELCO.'); return; } } else { if(!(BO_LIST.includes(corrEnt)||corrEnt==='DELCO')){ alert('Sè voi seti BAOu currispundanti devi essa una BO o DELCO.'); return; } }
+  const list=JSON.parse(localStorage.getItem('history')||'[]'); list.push(rec); localStorage.setItem('history',JSON.stringify(list)); alert('Missaghju validatu'); state=null; renderApp(); }
 
-function showHistory(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const c=$('content'); if(list.length===0){ c.innerHTML=`<section class="card"><h2>Historique</h2><p>Aucun message enregistré.</p><div class="actions"><button class="btn" id="back">Retour</button></div></section>`; $('back').onclick=()=>renderApp(); return; } const out=list.map(x=>`${x.date} ${x.time}\nÉmetteur: N° ${x.em_num} | ${x.em_name} | ${x.em_func} | ${x.em_ent}\nRécepteur: N° ${x.re_num} | ${x.re_name} | ${x.re_func} | ${x.re_ent}\n${x.msg}\n-----`).join("\n"); c.innerHTML=`<section class="card"><h2>Historique</h2><pre>${out}</pre><div class="actions"><button class="btn primary" id="exportCsv">Exporter CSV</button><button class="btn ghost" id="clearHistory">Supprimer tout</button><button class="btn" id="back">Retour</button></div></section>`; $('back').onclick=()=>renderApp(); $('exportCsv').onclick=exportCSV; $('clearHistory').onclick=()=>{ if(confirm("Voulez-vous vraiment supprimer tout l'historique ?")){ localStorage.removeItem('history'); renderApp(); } }; bindMenuActions(); }
+function showHistory(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const c=$('content'); if(list.length===0){ c.innerHTML=`<section class="card"><h2>Storicu</h2><p>Nisunu missaghju arrigistratu</p><div class="actions"><button class="btn" id="back">Ritornu</button></div></section>`; $('back').onclick=()=>renderApp(); return; } const out=list.map(x=>`${x.date} ${x.time}\nEmettori: N° ${x.em_num} | ${x.em_name} | ${x.em_func} | ${x.em_ent}\nRicevitori: N° ${x.re_num} | ${x.re_name} | ${x.re_func} | ${x.re_ent}\n${x.msg}\n-----`).join("\n"); c.innerHTML=`<section class="card"><h2>Storicu</h2><pre>${out}</pre><div class="actions"><button class="btn primary" id="exportCsv">Spurtà in CSV</button><button class="btn ghost" id="clearHistory">Sguassà tuttu</button><button class="btn" id="back">Ritornu</button></div></section>`; $('back').onclick=()=>renderApp(); $('exportCsv').onclick=exportCSV; $('clearHistory').onclick=()=>{ if(confirm("Seti sicuru di sguassà tuttu ?")){ localStorage.removeItem('history'); renderApp(); } }; bindMenuActions(); }
 
-function exportCSV(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const sep=';'; const headers=['Date','Heure','Rôle','N° Emetteur','Nom Emetteur','Fonction Emetteur','Entité Emetteur','N° Recepteur','Nom Recepteur','Fonction Recepteur','Entité Recepteur','Message']; const rows=list.map(x=>[x.date,x.time,x.role,x.em_num,x.em_name,x.em_func,x.em_ent,x.re_num,x.re_name,x.re_func,x.re_ent,(x.msg||'').replace(/\r?\n/g,' ')]); const csv=['\ufeff'+headers.join(sep)].concat(rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(sep))).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='historique_messages.csv'; document.body.appendChild(a); a.click(); a.remove(); }
+function exportCSV(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const sep=';'; const headers=['Data','Ori','Funzioni','N° Emettori','Casata Emettori','Funzioni Emettori','Entità Emettori','N° Ricevitori','Casata Ricevitori','Funzioni Ricevitori','Entità Ricevitori','Missaghju']; const rows=list.map(x=>[x.date,x.time,x.role,x.em_num,x.em_name,x.em_func,x.em_ent,x.re_num,x.re_name,x.re_func,x.re_ent,(x.msg||'').replace(/\r?\n/g,' ')]); const csv=['\ufeff'+headers.join(sep)].concat(rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(sep))).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Storicu_Missaghji.csv'; document.body.appendChild(a); a.click(); a.remove(); }
 
 document.addEventListener('DOMContentLoaded',()=>{ if($('startForm')) setupStart(); else setupMain(); });
