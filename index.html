@@ -4,17 +4,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Carnettu di Missaghji</title>
+  <title>Messagerie Opérationnelle – Accueil</title>
   <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body class="screen">
   <main class="card narrow">
-    <h1 class="title">CARNETTU DI MISSAGHJI</h1>
+    <h1 class="title">MESSAGERIE OPÉRATIONNELLE</h1>
     <form id="startForm" novalidate>
-      <label for="username">A voscia casata</label>
-      <input id="username" name="username" type="text" autocomplete="off" autocapitalize="characters" placeholder="" pattern="^[A-Za-zÀ-ÖØ-öø-ÿ\-\s]+$" required />
-      <label for="entity">Entità</label>
+      <label for="username">Nom (lettres, espaces et tirets uniquement)</label>
+      <input id="username" name="username" type="text" autocomplete="off" autocapitalize="characters" placeholder="Ex : MURACCIOLI STEPHANE" pattern="^[A-Za-zÀ-ÖØ-öø-ÿ\-\s]+$" required />
+      <small class="hint">Le nom sera automatiquement converti en MAJUSCULES.</small>
+      <label for="entity">Entité</label>
       <select id="entity" name="entity" required>
         <option value="BAO">BAO</option>
         <option value="BOBA">BOBA</option>
@@ -25,9 +26,7 @@
         <option value="BOPO">BOPO</option>
         <option value="BOVA">BOVA</option>
       </select>
-      <div>
-      <button type="submit" class="btn primary">Entra</button>
-      </div>
+      <button type="submit" class="btn primary">Entrer</button>
     </form>
   </main>
   <script>window.APP_VERSION='v1.3.3';</script>

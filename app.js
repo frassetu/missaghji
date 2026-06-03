@@ -24,38 +24,39 @@ function toggleMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.togg
 function closeMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.add('hidden'); }
 function bindMenuActions(){ const install=()=>{ if(window.deferredPrompt){ window.deferredPrompt.prompt(); window.deferredPrompt=null; } else alert('Installation non disponible.'); }; $('btnInstall')?.addEventListener('click',()=>{ closeMenu(); install(); }); $('btnHistory')?.addEventListener('click',()=>{ closeMenu(); showHistory(); }); $('btnChange')?.addEventListener('click',()=>{ closeMenu(); location.href='index.html'; }); }
 
-function setupMain(){ if(!$('topbar')) return; const user=localStorage.getItem('username')||''; const ent=localStorage.getItem('entity')||''; $('topbar').innerHTML=`<div><div class="app-title">CARNETTU DI MISSAGHJI<span class="version">${localStorage.getItem('version')||VERSION}</span></div><div class="meta">${user} (${ent})</div></div><div class="burger" id="burger">☰</div>`; $('burger').addEventListener('click',toggleMenu); $('overlayBackdrop')?.addEventListener('click',closeMenu); $('closeMenu')?.addEventListener('click',closeMenu); renderApp(); bindMenuActions(); }
+function setupMain(){ if(!$('topbar')) return; const user=localStorage.getItem('username')||''; const ent=localStorage.getItem('entity')||''; $('topbar').innerHTML=`<div><div class="app-title">MESSAGERIE OPÉRATIONNELLE <span class="version">${localStorage.getItem('version')||VERSION}</span></div><div class="meta">${user} (${ent})</div></div><div class="burger" id="burger">☰</div>`; $('burger').addEventListener('click',toggleMenu); $('overlayBackdrop')?.addEventListener('click',closeMenu); $('closeMenu')?.addEventListener('click',closeMenu); renderApp(); bindMenuActions(); }
 window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); window.deferredPrompt=e; });
 
 function renderApp(){ const user=localStorage.getItem('username')||''; const ent=localStorage.getItem('entity')||''; const c=$('content'); const hm=nowHM(); const s=state||{}; const meSide=(currentRole==='Émetteur')?'sender':'receiver'; const corrOptions=allowedCorrespondentEntities(ent); const optionsCorr=corrOptions.map(x=>`<option value="${x}" ${s[(meSide==='sender')?'reEnt':'enEnt']===x?'selected':''}>${x}</option>`).join('');
 
 c.innerHTML=`
 <section class="card block">
+  <h3>Contexte</h3>
   <div class="context-row">
     <div class="ctx-item ctx-item--role">
-      <label for="role">Funzioni</label>
+      <label for="role">Rôle</label>
       <select id="role">
-        <option ${currentRole==='Émetteur'?'selected':''}>Emettori</option>
-        <option ${currentRole==='Récepteur'?'selected':''}>Ricivitori</option>
+        <option ${currentRole==='Émetteur'?'selected':''}>Émetteur</option>
+        <option ${currentRole==='Récepteur'?'selected':''}>Récepteur</option>
       </select>
     </div>
     <div class="ctx-item ctx-item--hour">
-      <label for="hour">Ora</label>
+      <label for="hour">Heure</label>
       <input type="tel" inputmode="numeric" pattern="[0-9]*" id="hour" min="0" max="23" value="${s.hour||hm.h}" />
     </div>
     <div class="ctx-item ctx-item--min">
-      <label for="min">Minuta</label>
+      <label for="min">Minutes</label>
       <input type="tel" inputmode="numeric" pattern="[0-9]*" id="min" min="0" max="59" value="${s.min||hm.m}" />
     </div>
     <div class="ctx-item ctx-btn">
       <label>&nbsp;</label>
-      <button class="btn icon-btn" id="btnNow" title="Attualizà">⟳</button>
+      <button class="btn icon-btn" id="btnNow" title="Actualiser">⟳</button>
     </div>
   </div>
 </section>
 
 <section class="card block">
-  <h3>Emettori <span class="badge">${meSide==='sender'?'EIU':''}</span></h3>
+  <h3>Émetteur <span class="badge">${meSide==='sender'?'MOI':''}</span></h3>
   <div class="row-num-name">
     <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="enNum" min="1" max="999" value="${s.enNum||''}">
     ${meSide==='sender'?`<button class="num-btn" id="enGen">⟳</button>`:`<div></div>`}
@@ -68,7 +69,7 @@ c.innerHTML=`
 </section>
 
 <section class="card block">
-  <h3>Ricivitori <span class="badge">${meSide==='receiver'?'EIU':''}</span></h3>
+  <h3>Récepteur <span class="badge">${meSide==='receiver'?'MOI':''}</span></h3>
   <div class="row-num-name">
     <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="reNum" min="1" max="999" value="${s.reNum||''}">
     ${meSide==='receiver'?`<button class="num-btn" id="reGen">⟳</button>`:`<div></div>`}
@@ -81,11 +82,11 @@ c.innerHTML=`
 </section>
 
 <section class="card block">
-  <h3>Missaghju</h3>
-  <textarea id="message" placeholder="Scriva u missaghju">${s.message||''}</textarea>
+  <h3>Message</h3>
+  <textarea id="message" placeholder="Écrire le message...">${s.message||''}</textarea>
   <div class="actions">
-    <button class="btn primary" id="btnSave">Validà</button>
-    <button class="btn ghost" id="btnReset">Rinizializà</button>
+    <button class="btn primary" id="btnSave">Valider</button>
+    <button class="btn ghost" id="btnReset">Réinitialiser</button>
   </div>
 </section>`;
 
@@ -118,12 +119,12 @@ c.innerHTML=`
 }
 
 function saveMessage(){ const rec={ date:new Date().toLocaleDateString('fr-FR'), time:`${$('hour').value.toString().padStart(2,'0')}:${$('min').value.toString().padStart(2,'0')}`, role:$('role').value, em_num:String(clampNum($('enNum').value||nextNum())), em_name:$('enName').value.trim(), em_func:$('enFunc').value, em_ent:$('enEnt').value, re_num:String(clampNum($('reNum').value||'')), re_name:$('reName').value.trim(), re_func:$('reFunc').value, re_ent:$('reEnt').value, msg:$('message').value.trim() };
-  if(!lettersOnly(rec.em_name)||!lettersOnly(rec.re_name)){ alert('I casati ponu avè solu letteri'); return; }
-  const userEnt=localStorage.getItem('entity')||''; const corrEnt=(currentRole==='Émetteur')?rec.re_ent:rec.em_ent; if(isBO(userEnt)){ if(!(corrEnt==='BAO'||corrEnt==='DELCO')){ alert('Sì voi seti di una BO, u curespundanti devi essa u BAO o DELCO.'); return; } } else { if(!(BO_LIST.includes(corrEnt)||corrEnt==='DELCO')){ alert('Sì voi seti di u BAO, u curespundanti devi essa una BO o DELCO.'); return; } }
-  const list=JSON.parse(localStorage.getItem('history')||'[]'); list.push(rec); localStorage.setItem('history',JSON.stringify(list)); alert('Missaghju Validatu'); state=null; renderApp(); }
+  if(!lettersOnly(rec.em_name)||!lettersOnly(rec.re_name)){ alert('Les noms ne doivent contenir que des lettres, espaces et tirets.'); return; }
+  const userEnt=localStorage.getItem('entity')||''; const corrEnt=(currentRole==='Émetteur')?rec.re_ent:rec.em_ent; if(isBO(userEnt)){ if(!(corrEnt==='BAO'||corrEnt==='DELCO')){ alert('Si vous êtes une BO, le correspondant doit être BAO ou DELCO.'); return; } } else { if(!(BO_LIST.includes(corrEnt)||corrEnt==='DELCO')){ alert('Si vous êtes BAO, le correspondant doit être une BO ou DELCO.'); return; } }
+  const list=JSON.parse(localStorage.getItem('history')||'[]'); list.push(rec); localStorage.setItem('history',JSON.stringify(list)); alert('Message Validé'); state=null; renderApp(); }
 
-function showHistory(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const c=$('content'); if(list.length===0){ c.innerHTML=`<section class="card"><h2>Storicu</h2><p>Nisunu missaghju arrigistratu.</p><div class="actions"><button class="btn" id="back">Ritornu</button></div></section>`; $('back').onclick=()=>renderApp(); return; } const out=list.map(x=>`${x.date} ${x.time}\nEmettori: N° ${x.em_num} | ${x.em_name} | ${x.em_func} | ${x.em_ent}\nRicivitori: N° ${x.re_num} | ${x.re_name} | ${x.re_func} | ${x.re_ent}\n${x.msg}\n-----`).join("\n"); c.innerHTML=`<section class="card"><h2>Storicu</h2><pre>${out}</pre><div class="actions"><button class="btn primary" id="exportCsv">Spurtà in CSV</button><button class="btn ghost" id="clearHistory">Sguassà tuttu</button><button class="btn" id="back">Ritornu</button></div></section>`; $('back').onclick=()=>renderApp(); $('exportCsv').onclick=exportCSV; $('clearHistory').onclick=()=>{ if(confirm("Seti sicuru di sguassà tuttu ?")){ localStorage.removeItem('history'); renderApp(); } }; bindMenuActions(); }
+function showHistory(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const c=$('content'); if(list.length===0){ c.innerHTML=`<section class="card"><h2>Historique</h2><p>Aucun message enregistré.</p><div class="actions"><button class="btn" id="back">Retour</button></div></section>`; $('back').onclick=()=>renderApp(); return; } const out=list.map(x=>`${x.date} ${x.time}\nÉmetteur: N° ${x.em_num} | ${x.em_name} | ${x.em_func} | ${x.em_ent}\nRécepteur: N° ${x.re_num} | ${x.re_name} | ${x.re_func} | ${x.re_ent}\n${x.msg}\n-----`).join("\n"); c.innerHTML=`<section class="card"><h2>Historique</h2><pre>${out}</pre><div class="actions"><button class="btn primary" id="exportCsv">Exporter CSV</button><button class="btn ghost" id="clearHistory">Supprimer tout</button><button class="btn" id="back">Retour</button></div></section>`; $('back').onclick=()=>renderApp(); $('exportCsv').onclick=exportCSV; $('clearHistory').onclick=()=>{ if(confirm("Voulez-vous vraiment supprimer tout l'historique ?")){ localStorage.removeItem('history'); renderApp(); } }; bindMenuActions(); }
 
-function exportCSV(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const sep=';'; const headers=['Data','Ora','Funzioni','N° Emettori','Casata Emettori','Funzioni Emettori','Entità Emettori','N° Ricivitori','Casata Ricivitori','Funzioni Ricivitori','Entità Ricivitori','Missaghju']; const rows=list.map(x=>[x.date,x.time,x.role,x.em_num,x.em_name,x.em_func,x.em_ent,x.re_num,x.re_name,x.re_func,x.re_ent,(x.msg||'').replace(/\r?\n/g,' ')]); const csv=['\ufeff'+headers.join(sep)].concat(rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(sep))).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='historique_messages.csv'; document.body.appendChild(a); a.click(); a.remove(); }
+function exportCSV(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const sep=';'; const headers=['Date','Heure','Rôle','N° Emetteur','Nom Emetteur','Fonction Emetteur','Entité Emetteur','N° Recepteur','Nom Recepteur','Fonction Recepteur','Entité Recepteur','Message']; const rows=list.map(x=>[x.date,x.time,x.role,x.em_num,x.em_name,x.em_func,x.em_ent,x.re_num,x.re_name,x.re_func,x.re_ent,(x.msg||'').replace(/\r?\n/g,' ')]); const csv=['\ufeff'+headers.join(sep)].concat(rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(sep))).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='historique_messages.csv'; document.body.appendChild(a); a.click(); a.remove(); }
 
 document.addEventListener('DOMContentLoaded',()=>{ if($('startForm')) setupStart(); else setupMain(); });
