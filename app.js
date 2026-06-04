@@ -9,7 +9,7 @@ if ('serviceWorker' in navigator) {
 }
 
 const BO_LIST=["BOBA","BOCC","BOES","BOGA","BOGB","BOPO","BOVA"]; const BO_FUNCS=["CDC","CDT","CDR","PDA","PDE","PDM","PDS"];
-const VERSION=window.APP_VERSION||'v1.3.3';
+const VERSION=window.APP_VERSION||'v1.3.5';
 const $=id=>document.getElementById(id);
 const lettersOnly=str=>(/^[A-Za-zÀ-ÖØ-öø-ÿ\-\s]+$/u).test((str||'').trim());
 const clampNum=n=>{n=parseInt(n||0,10); if(isNaN(n)||n<1) return 1; if(n>999) return 999; return n;};
