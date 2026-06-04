@@ -1,4 +1,3 @@
-
 // PWA registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -25,6 +24,7 @@ function captureState(){ const get=id=>$(id)?$(id).value:''; state={ hour:get('h
 function invertStateBetweenSides(){ if(!state) return; const s=state; [s.enNum,s.reNum]=[s.reNum,s.enNum]; [s.enName,s.reName]=[s.reName,s.enName]; [s.enFunc,s.reFunc]=[s.reFunc,s.enFunc]; [s.enEnt,s.reEnt]=[s.reEnt,s.enEnt]; }
 function applyUppercaseLive(ids){ ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value=(el.value||'').toUpperCase(); }); }); }
 function applyLettersOnly(ids){ ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value=el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,''); }); }); }
+function applyNumericOnly(ids){ ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('keydown',e=>{ if(!/[0-9]|Backspace|Delete|ArrowLeft|ArrowRight|Tab/.test(e.key)) e.preventDefault(); }); el.addEventListener('input',()=>{ el.value=el.value.replace(/[^0-9]/g,''); }); }); }
 
 function toggleMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.toggle('hidden'); }
 function closeMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.add('hidden'); }
@@ -47,11 +47,11 @@ c.innerHTML=`
     </div>
     <div class="ctx-item ctx-item--hour">
       <label for="hour">Ori</label>
-      <input type="tel" inputmode="numeric" pattern="[0-9]*" id="hour" min="0" max="23" value="${s.hour||hm.h}" />
+      <input type="tel" inputmode="numeric" pattern="[0-9]*" id="hour" maxlength="2" min="0" max="23" value="${s.hour||hm.h}" />
     </div>
     <div class="ctx-item ctx-item--min">
       <label for="min">Minuti</label>
-      <input type="tel" inputmode="numeric" pattern="[0-9]*" id="min" min="0" max="59" value="${s.min||hm.m}" />
+      <input type="tel" inputmode="numeric" pattern="[0-9]*" id="min" maxlength="2" min="0" max="59" value="${s.min||hm.m}" />
     </div>
     <div class="ctx-item ctx-btn">
       <label>&nbsp;</label>
@@ -115,9 +115,9 @@ c.innerHTML=`
   $('enGen')?.addEventListener('click',e=>{ e.preventDefault(); $('enNum').value=nextNum(); });
   $('reGen')?.addEventListener('click',e=>{ e.preventDefault(); $('reNum').value=nextNum(); });
 
-  // V1.3.3 : uppercase uniquement sur les NOMS, pas sur le message
   applyLettersOnly(['enName','reName']);
   applyUppercaseLive(['enName','reName']);
+  applyNumericOnly(['hour','min','enNum','reNum']);
 
   $('btnSave').onclick=e=>{ e.preventDefault(); saveMessage(); };
   $('btnReset').onclick=e=>{ e.preventDefault(); state=null; renderApp(); };
