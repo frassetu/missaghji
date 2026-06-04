@@ -1,13 +1,10 @@
 
 // PWA registration
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    try {
-      const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
-      console.log('SW OK:', reg);
-    } catch (err) {
-      console.error('SW ERROR:', err);
-    }
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/missaghji/sw.js', {
+      scope: '/missaghji/'
+    });
   });
 }
 
