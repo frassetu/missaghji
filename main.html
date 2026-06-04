@@ -1,17 +1,22 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Carnettu di Missaghji</title>
+  <link rel="manifest" href="/missaghji/manifest.json">
   <link rel="stylesheet" href="style.css" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/missaghji/sw.js', { scope: '/missaghji/' });
+      });
+    }
+  </script>
 </head>
 <body class="screen">
   <header id="topbar" class="topbar"></header>
   <div id="content" class="container"></div>
-
-  <!-- Menu overlay -->
   <div id="menuOverlay" class="overlay hidden">
     <div class="overlay-backdrop" id="overlayBackdrop"></div>
     <aside class="drawer" role="dialog" aria-label="Menu">
@@ -26,7 +31,6 @@
       </div>
     </aside>
   </div>
-
   <script src="app.js"></script>
 </body>
 </html>
