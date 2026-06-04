@@ -105,7 +105,7 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
 .row-num-name .num-btn{
   display:inline-flex; align-items:center; justify-content:center;
   width:42px; height:40px; padding:0; font-size:1.4rem;
-  border:2px solid var(--text); border-radius:10px; background:#fff; cursor:pointer
+  border:2px solid var(--text); border-radius:10px; background:#fff; cursor:pointer color:var(--text);
 }
 .row-num-name .num-btn:active{transform:scale(.95)}
 .row-num-name input[type="text"]{
