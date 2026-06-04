@@ -32,5 +32,14 @@
   </main>
   <script>window.APP_VERSION='v1.3.3';</script>
   <script src="app.js"></script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/missaghji/sw.js', { scope: '/missaghji/' })
+        .then(reg => console.log('SW enregistré :', reg.scope))
+        .catch(err => console.error('SW erreur :', err));
+    });
+  }
+</script>
 </body>
 </html>
