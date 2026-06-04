@@ -2,7 +2,8 @@
 {
   "name": "Carnettu di Missaghji",
   "short_name": "Missaghji",
-  "start_url": "index.html",
+  "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#FFFFFF",
   "theme_color": "#FF8A00",
