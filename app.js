@@ -2,9 +2,9 @@
 // PWA registration
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/missaghji/sw.js', {
-      scope: '/missaghji/'
-    });
+    navigator.serviceWorker.register('/missaghji/sw.js')
+      .then(reg => console.log('SW OK', reg))
+      .catch(err => console.log('SW ERREUR', err));
   });
 }
 
