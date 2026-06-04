@@ -1,6 +1,15 @@
 
 // PWA registration
-if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js')); }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+      console.log('SW OK:', reg);
+    } catch (err) {
+      console.error('SW ERROR:', err);
+    }
+  });
+}
 
 const BO_LIST=["BOBA","BOCC","BOES","BOGA","BOGB","BOPO","BOVA"]; const BO_FUNCS=["CDC","CDT","CDR","PDA","PDE","PDM","PDS"];
 const VERSION=window.APP_VERSION||'v1.3.3';
