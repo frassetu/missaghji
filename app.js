@@ -17,10 +17,81 @@ const nowHM=()=>{const d=new Date(); return {h:String(d.getHours()).padStart(2,'
 const isBO=ent=>BO_LIST.includes(ent);
 const allowedCorrespondentEntities=userEnt=> isBO(userEnt)? ['BAO','DELCO'] : BO_LIST.concat(['DELCO']);
 
+// ---- Données Incident (menus dépendants) ----
+const incSiegeOptions = {
+  "Canalisation souterraine HTA": ["-", "6B - Jonction HTA papier/papier", "6D - Jonction HTA sec/sec", "6F - Transition HTA rétractable à froid JTRF hors 3M", "6G - Transition HTA rubanée JTR", "6H - Transition HTA thermo rétractable JT TH", "6K - Raccordement extréminté HTA EUI (C ou N)", "6L - Raccordement Connecteurs séparables HTA CS (E ou D)", "6M - Transition HTA rétractable à froid JTRF 3M."],
+  "Canalisation souterraine HTA ou BT": ["-", "60 - Siège en attente d'indentification ou non identifié", "6A - Plein câble papier", "6C - Plein câble synthétique", "6T - Accessoire de dérivation HTA ou BT", "6Z - Bout perdu raccordé sur tout type de câble"],
+  "Ligne aérienne HTA ou BT": ["-", "22 - Interrupteur manuel: IACM, ISP", "23 - Autre interrupteur: IAT, IACT", "24 - Armement", "25 - Isolateur", "26 - Attache", "27 - Raccord, pont, bretelle", "29 - Parafoudres ou éclateurs", "2A - Support bois", "2B - Support béton", "2C - Support métallique", "31 - Contact entre conducteurs", "38 - Ligne à conducteurs isolés", "3A - Conducteurs nus rompus, hors faible section", "3B - Conducteurs nus rompus, faible section <14 CU ou <22 AL"],
+  "Poste HTA/BT": ["-", "29 - Parafoudres ou éclateurs", "40 - Armoire de coupure", "41 - Transformateur", "42 - Partie HTA", "43 - Partie BT", "S8 - Appareillage BT"],
+  "Remontée aéro-souterraine HTA": ["-", "51 - Remontée aéro-sout: Câble", "5A - Remontée aéro-sout HTA: Extrémités"],
+  "Réseau transport": ["-", "S1 - Réseau transport"],
+  "Siège divers": ["-", "00 - Pas de siège", "01 - Pas de dégât: éliminé avec manœuvres d' OMT", "02 - Pas de dégât: éliminé avec manœuvres manuelles", "13 - Autre point d'alimentation, poste HTA/HTA et autotransformateur", "15 - Incident HTA avec siège sur réseau BT", "16 - Incident BT avec siège sur branchement BT"]
+};
+
+const incCausesBase = {
+  "Causes internes": ["-", "01 - Fausse manoeuvres", "11 - Défaut de conception", "12 - Défaut de montage/tirage", "13 - Défaillance protection", "15 - Usure naturelle", "21 - Dépassement de capacités électriques"],
+  "Causes externes": ["-", "31 - Corps étranger", "32 - Véhicule", "3A - Malveillance", "3B - Vol de métaux", "3C - Chasse", "3D - Incendie d'origine externe", "35 - Autres travaux de tiers (arrachages, ...)", "37 - Installation de clients HTA", "41 - Mouvement de terrain", "42 - Oiseaux", "43 - Autres animaux"],
+  "Causes climatiques": ["-", "51 - Coup de foudre", "52 - Pollution, corrosion", "53 - Condensation, inondation"],
+  "Autres": ["-"]
+};
+
+const incCausesAdditionnelles = {
+  "Causes internes": {
+    "Poste HTA/BT": ["16 - Incident transfo HTA/BT suite à prélèvement PCB"],
+    "Ligne aérienne HTA ou BT": ["22 - Conducteurs déréglés"]
+  },
+  "Causes externes": {
+    "Ligne aérienne HTA ou BT": ["34 - Travaux de tiers - Elagae ou abattage", "44 - Elagage insuffisant", "4A - Abattage Insuffisant"],
+    "Siège divers": {
+      "01": ["64 - Cause inconnue avec circonstances atmosphériques normales"],
+      "02": ["64 - Cause inconnue avec circonstances atmosphériques normales"]
+    }
+  },
+  "Causes climatiques": {
+    "Ligne aérienne HTA ou BT": ["45 - Chute de branche par vent", "46 - Chute d'arbre par vent", "47 - Effort anormal par tempête de vent ou de pluie", "48 - Effort anormal par tempête de neige ou de givre"],
+    "Canalisation souterraine HTA ou BT": ["49 - Cause forte chaleurs (canicule ou chaleur estivale)"],
+    "Siège divers": {
+      "01": ["61 - Cause inconnue : par grand vent", "62 - Cause inconnue : par orage", "63 - Cause inconnue : par neige ou givre"],
+      "02": ["61 - Cause inconnue : par grand vent", "62 - Cause inconnue : par orage", "63 - Cause inconnue : par neige ou givre"]
+    }
+  },
+  "Autres": {
+    "Siège divers": {
+      "00": ["8C - Panne de groupe électrogène (panne de carburant)", "8D - Panne de groupe électrogène (défaillance du groupe)", "07 - Grève"],
+      "01": ["72 - Départ en RSE (avec cause non identifiée)", "8C - Panne de groupe électrogène (panne de carburant)", "8D - Panne de groupe électrogène (défaillance du groupe)", "07 - Grève"],
+      "02": ["72 - Départ en RSE (avec cause non identifiée)", "8C - Panne de groupe électrogène (panne de carburant)", "8D - Panne de groupe électrogène (défaillance du groupe)", "07 - Grève"]
+    }
+  }
+};
+
+// ---- Données Travaux urgent (menus dépendants) ----
+const travSiegeList = [
+  "S0 - Ouvrage Client","S1 - Réseau Transport","S2 - Poste HTB/HTA : Partie HTB","S3 - Poste HTB/HTA : Partie HTA",
+  "S5 - Poste HTA/HTA","S6 - Poste HTA/BT : Transformateur","S7 - Poste HTA/BT : Appareillage HTA","S8 - Poste HTA/BT : Appareillage BT",
+  "T1 - Ligne aérienne : conducteurs","T2 - Ligne aérienne : supports et armements","T3 - Ligne aérienne : accessoires",
+  "T4 - Ligne souterraine : câble","T8 - Ligne souterraine : accessoire"
+];
+
+const travCauseOptions = {
+  "S0 - Ouvrage Client": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D7 - Travaux d'élagage","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DH - Séparation de réseau suite à la demande d'un client S0","DJ - Coupure HTA pour réparation suite à un incident BT","DL - Travaux de raccordement Producteurs"],
+  "S1 - Réseau Transport": ["","D0 - Travaux cause transport","DK - Essai de renvoi HTB","DL - Travaux de raccordement Producteurs"],
+  "S2 - Poste HTB/HTA : Partie HTB": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D6 - Maintenance lourde (prolongation durée de vie des ouvrages)","D7 - Travaux d'élagage","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DL - Travaux de raccordement Producteurs"],
+  "S3 - Poste HTB/HTA : Partie HTA": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D6 - Maintenance lourde (prolongation durée de vie des ouvrages)","D7 - Travaux d'élagage","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DJ - Coupure HTA pour réparation suite à un incident BT","DL - Travaux de raccordement Producteurs"],
+  "S5 - Poste HTA/HTA": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D6 - Maintenance lourde (prolongation durée de vie des ouvrages)","D7 - Travaux d'élagage","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DJ - Coupure HTA pour réparation suite à un incident BT","DL - Travaux de raccordement Producteurs"],
+  "S6 - Poste HTA/BT : Transformateur": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D6 - Maintenance lourde (prolongation durée de vie des ouvrages)","D7 - Travaux d'élagage","D8 - Traitement PCB","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DJ - Coupure HTA pour réparation suite à un incident BT","DL - Travaux de raccordement Producteurs"],
+  "S7 - Poste HTA/BT : Appareillage HTA": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D6 - Maintenance lourde (prolongation durée de vie des ouvrages)","D7 - Travaux d'élagage","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DJ - Coupure HTA pour réparation suite à un incident BT","DL - Travaux de raccordement Producteurs"],
+  "S8 - Poste HTA/BT : Appareillage BT": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D6 - Maintenance lourde (prolongation durée de vie des ouvrages)","D7 - Travaux d'élagage","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DJ - Coupure HTA pour réparation suite à un incident BT","DL - Travaux de raccordement Producteurs"],
+  "T1 - Ligne aérienne : conducteurs": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D6 - Maintenance lourde (prolongation durée de vie des ouvrages)","D7 - Travaux d'élagage","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DJ - Coupure HTA pour réparation suite à un incident BT","DL - Travaux de raccordement Producteurs"],
+  "T2 - Ligne aérienne : supports et armements": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D6 - Maintenance lourde (prolongation durée de vie des ouvrages)","D7 - Travaux d'élagage","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DJ - Coupure HTA pour réparation suite à un incident BT","DL - Travaux de raccordement Producteurs"],
+  "T3 - Ligne aérienne : accessoires": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D6 - Maintenance lourde (prolongation durée de vie des ouvrages)","D7 - Travaux d'élagage","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DJ - Coupure HTA pour réparation suite à un incident BT","DL - Travaux de raccordement Producteurs"],
+  "T4 - Ligne souterraine : câble": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D6 - Maintenance lourde (prolongation durée de vie des ouvrages)","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DJ - Coupure HTA pour réparation suite à un incident BT","DL - Travaux de raccordement Producteurs"],
+  "T8 - Ligne souterraine : accessoire": ["","D1 - Travaux urgents (mise en sécurité décidée par EDF)","D2 - Coupure à la demande des autorités (ou de GRDF)","D3 - Réparation définitive suite à incident","D4 - Réparation suite à événement de grande ampleur","D5 - Travaux de maintenance courante (hors élagage)","D6 - Maintenance lourde (prolongation durée de vie des ouvrages)","D9 - Travaux de raccordement sous MOA Enedis","DA - Travaux de raccordement sous MOA ER","DB - Travaux délibérés (investissements) sous MOA EDF","DC - Travaux délibérés (investissements) sous MOA ER","DD - Adaptation aux charges","DE - Travaux de tiers à proximité des ouvrages","DF - Travaux de déplacement d'ouvrage à la demande de tiers","DG - Réparation de dégâts dus à des tiers","DJ - Coupure HTA pour réparation suite à un incident BT","DL - Travaux de raccordement Producteurs"]
+};
+
 function setupStart(){const savedUser=localStorage.getItem('username');const savedEntity=localStorage.getItem('entity');if(savedUser&&savedEntity){location.replace('main.html');return;}const form=$('startForm');if(!form)return;const input=$('username');input.addEventListener('input',()=>{input.value=input.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,'').toUpperCase();});form.addEventListener('submit',e=>{e.preventDefault();const name=(input.value||'').trim();if(!name||!lettersOnly(name))return alert('Le nom ne doit contenir que des lettres, espaces et tirets.');const ent=$('entity').value;localStorage.setItem('username',name.toUpperCase());localStorage.setItem('entity',ent);if(!localStorage.getItem('num'))localStorage.setItem('num','0');localStorage.setItem('version',VERSION);location.href='main.html';});}
 
 let currentRole='Émetteur'; let state=null;
-function captureState(){ const get=id=>$(id)?$(id).value:''; state={ hour:get('hour'), min:get('min'), enNum:get('enNum'), enName:get('enName'), enFunc:get('enFunc'), enEnt:get('enEnt'), reNum:get('reNum'), reName:get('reName'), reFunc:get('reFunc'), reEnt:get('reEnt'), message:get('message') }; }
+function captureState(){ const get=id=>$(id)?$(id).value:''; state={ hour:get('hour'), min:get('min'), enNum:get('enNum'), enName:get('enName'), enFunc:get('enFunc'), enEnt:get('enEnt'), reNum:get('reNum'), reName:get('reName'), reFunc:get('reFunc'), reEnt:get('reEnt'), message:get('message'), incTypeSiege:get('incTypeSiege'), incSiege:get('incSiege'), incTypeCause:get('incTypeCause'), incCause:get('incCause'), travSiege:get('travSiege'), travCause:get('travCause') }; }
 function invertStateBetweenSides(){ if(!state) return; const s=state; [s.enNum,s.reNum]=[s.reNum,s.enNum]; [s.enName,s.reName]=[s.reName,s.enName]; [s.enFunc,s.reFunc]=[s.reFunc,s.enFunc]; [s.enEnt,s.reEnt]=[s.reEnt,s.enEnt]; }
 function applyUppercaseLive(ids){ ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value=(el.value||'').toUpperCase(); }); }); }
 function applyLettersOnly(ids){ ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value=el.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,''); }); }); }
@@ -33,7 +104,89 @@ function bindMenuActions(){ const install=()=>{if(window.deferredPrompt){window.
 function setupMain(){ if(!$('topbar')) return; const user=localStorage.getItem('username')||''; const ent=localStorage.getItem('entity')||''; $('topbar').innerHTML=`<div><div class="app-title">CARNETTU DI MESSAGHJI<span class="version">${localStorage.getItem('version')||VERSION}</span></div><div class="meta">${user} (${ent})</div></div><div class="burger" id="burger">☰</div>`; $('burger').addEventListener('click',toggleMenu); $('overlayBackdrop')?.addEventListener('click',closeMenu); $('closeMenu')?.addEventListener('click',closeMenu); renderApp(); bindMenuActions(); }
 window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); window.deferredPrompt=e; });
 
+// ---- Câblage des menus Incident (mêmes règles que le HTA/BT) ----
+function setupIncidentSelects(s){
+  const typeSiegeEl=$('incTypeSiege'), siegeEl=$('incSiege'), typeCauseEl=$('incTypeCause'), causeEl=$('incCause');
+  if(!typeSiegeEl) return;
+
+  function updateSiege(){
+    const selected=typeSiegeEl.value;
+    siegeEl.innerHTML="<option value=''>Siège</option>";
+    if(incSiegeOptions[selected]){
+      incSiegeOptions[selected].forEach(opt=>{
+        const o=document.createElement('option');
+        o.value=opt.split(' - ')[0]; o.text=opt;
+        siegeEl.appendChild(o);
+      });
+    }
+    updateCause();
+  }
+
+  function updateCause(){
+    const typeCause=typeCauseEl.value, typeSiege=typeSiegeEl.value, siege=siegeEl.value;
+    if(!typeCause||!typeSiege||!siege){ causeEl.innerHTML="<option value=''>Cause</option>"; return; }
+    causeEl.innerHTML="";
+    (incCausesBase[typeCause]||['-']).forEach(c=>{ const o=document.createElement('option'); o.value=c; o.text=c; causeEl.appendChild(o); });
+    const add=incCausesAdditionnelles[typeCause];
+    if(add){
+      if(Array.isArray(add[typeSiege])){
+        add[typeSiege].forEach(c=>{ const o=document.createElement('option'); o.value=c; o.text=c; causeEl.appendChild(o); });
+      } else if(add[typeSiege]&&add[typeSiege][siege]){
+        add[typeSiege][siege].forEach(c=>{ const o=document.createElement('option'); o.value=c; o.text=c; causeEl.appendChild(o); });
+      }
+    }
+  }
+
+  typeSiegeEl.addEventListener('change',updateSiege);
+  siegeEl.addEventListener('change',updateCause);
+  typeCauseEl.addEventListener('change',updateCause);
+
+  // restaurer l'état si présent
+  if(s&&s.incTypeSiege){ typeSiegeEl.value=s.incTypeSiege; updateSiege(); if(s.incSiege){ siegeEl.value=s.incSiege; updateCause(); if(s.incTypeCause){ typeCauseEl.value=s.incTypeCause; updateCause(); if(s.incCause) causeEl.value=s.incCause; } } }
+}
+
+// ---- Câblage du menu Travaux urgent ----
+function setupTravauxSelects(s){
+  const siegeEl=$('travSiege'), causeEl=$('travCause');
+  if(!siegeEl) return;
+
+  function updateCause(){
+    const selected=siegeEl.value;
+    causeEl.innerHTML="<option value=''>Cause</option>";
+    if(travCauseOptions[selected]){
+      travCauseOptions[selected].forEach(c=>{
+        if(c===''){ return; }
+        const o=document.createElement('option'); o.value=c; o.text=c; causeEl.appendChild(o);
+      });
+    }
+  }
+
+  siegeEl.addEventListener('change',updateCause);
+
+  if(s&&s.travSiege){ siegeEl.value=s.travSiege; updateCause(); if(s.travCause) causeEl.value=s.travCause; }
+}
+
 function renderApp(){ const user=localStorage.getItem('username')||''; const ent=localStorage.getItem('entity')||''; const c=$('content'); const hm=nowHM(); const s=state||{}; const meSide=(currentRole==='Émetteur')?'sender':'receiver'; const corrOptions=allowedCorrespondentEntities(ent); const optionsCorr=corrOptions.map(x=>`<option value="${x}" ${s[(meSide==='sender')?'reEnt':'enEnt']===x?'selected':''}>${x}</option>`).join('');
+
+const isBAO=(ent==='BAO');
+const incTypeSiegeOptions=Object.keys(incSiegeOptions).map(k=>`<option value="${k}">${k}</option>`).join('');
+const incTypeCauseOptions=Object.keys(incCausesBase).map(k=>`<option value="${k}">${k}</option>`).join('');
+const travSiegeSelectOptions=travSiegeList.map(k=>`<option value="${k}">${k}</option>`).join('');
+
+const incidentTravauxBlock = isBAO ? `
+<div class="row-func-ent" style="margin-top:10px">
+  <select id="incTypeSiege"><option value="">Incidenti - Tippu Siegiu</option>${incTypeSiegeOptions}</select>
+  <select id="incSiege"><option value="">Siegiu</option></select>
+</div>
+<div class="row-func-ent">
+  <select id="incTypeCause"><option value="">Incidenti - Tippu Causa</option>${incTypeCauseOptions}</select>
+  <select id="incCause"><option value="">Causa</option></select>
+</div>
+<div class="row-func-ent" style="margin-top:10px">
+  <select id="travSiege"><option value="">Travaux urgent - Siegiu</option>${travSiegeSelectOptions}</select>
+  <select id="travCause"><option value="">Causa</option></select>
+</div>
+` : '';
 
 c.innerHTML=`
 <section class="card block">
@@ -89,6 +242,7 @@ c.innerHTML=`
 <section class="card block">
   <h3>Missaghju</h3>
   <textarea id="message" placeholder="Scriva u missaghju">${s.message||''}</textarea>
+  ${incidentTravauxBlock}
   <div class="actions">
     <button class="btn primary" id="btnSave">Validà</button>
     <button class="btn ghost" id="btnReset">Rinizialisà</button>
@@ -119,17 +273,19 @@ c.innerHTML=`
   applyUppercaseLive(['enName','reName']);
   applyNumericOnly(['hour','min','enNum','reNum']);
 
+  if(isBAO){ setupIncidentSelects(s); setupTravauxSelects(s); }
+
   $('btnSave').onclick=e=>{ e.preventDefault(); saveMessage(); };
   $('btnReset').onclick=e=>{ e.preventDefault(); state=null; renderApp(); };
 }
 
-function saveMessage(){ const rec={ date:new Date().toLocaleDateString('fr-FR'), time:`${$('hour').value.toString().padStart(2,'0')}:${$('min').value.toString().padStart(2,'0')}`, role:$('role').value, em_num:String(clampNum($('enNum').value||nextNum())), em_name:$('enName').value.trim(), em_func:$('enFunc').value, em_ent:$('enEnt').value, re_num:String(clampNum($('reNum').value||'')), re_name:$('reName').value.trim(), re_func:$('reFunc').value, re_ent:$('reEnt').value, msg:$('message').value.trim() };
+function saveMessage(){ const rec={ date:new Date().toLocaleDateString('fr-FR'), time:`${$('hour').value.toString().padStart(2,'0')}:${$('min').value.toString().padStart(2,'0')}`, role:$('role').value, em_num:String(clampNum($('enNum').value||nextNum())), em_name:$('enName').value.trim(), em_func:$('enFunc').value, em_ent:$('enEnt').value, re_num:String(clampNum($('reNum').value||'')), re_name:$('reName').value.trim(), re_func:$('reFunc').value, re_ent:$('reEnt').value, msg:$('message').value.trim(), inc_type_siege:$('incTypeSiege')?$('incTypeSiege').value:'', inc_siege:$('incSiege')?$('incSiege').value:'', inc_type_cause:$('incTypeCause')?$('incTypeCause').value:'', inc_cause:$('incCause')?$('incCause').value:'', trav_siege:$('travSiege')?$('travSiege').value:'', trav_cause:$('travCause')?$('travCause').value:'' };
   if(!lettersOnly(rec.em_name)||!lettersOnly(rec.re_name)){ alert('I casati devini cuntena soli letteri.'); return; }
   const userEnt=localStorage.getItem('entity')||''; const corrEnt=(currentRole==='Émetteur')?rec.re_ent:rec.em_ent; if(isBO(userEnt)){ if(!(corrEnt==='BAO'||corrEnt==='DELCO')){ alert('Sè voi seti una BO, u currispundanti devi essa BAO o DELCO.'); return; } } else { if(!(BO_LIST.includes(corrEnt)||corrEnt==='DELCO')){ alert('Sè voi seti BAOu currispundanti devi essa una BO o DELCO.'); return; } }
   const list=JSON.parse(localStorage.getItem('history')||'[]'); list.push(rec); localStorage.setItem('history',JSON.stringify(list)); alert('Missaghju validatu'); state=null; renderApp(); }
 
 function showHistory(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const c=$('content'); if(list.length===0){ c.innerHTML=`<section class="card"><h2>Storicu</h2><p>Nisunu missaghju arrigistratu</p><div class="actions"><button class="btn" id="back">Ritornu</button></div></section>`; $('back').onclick=()=>renderApp(); return; } const out=list.map(x=>`${x.date} ${x.time}\nEmettori: N° ${x.em_num} | ${x.em_name} | ${x.em_func} | ${x.em_ent}\nRicevitori: N° ${x.re_num} | ${x.re_name} | ${x.re_func} | ${x.re_ent}\n${x.msg}\n-----`).join("\n"); c.innerHTML=`<section class="card"><h2>Storicu</h2><pre>${out}</pre><div class="actions"><button class="btn primary" id="exportCsv">Spurtà in CSV</button><button class="btn ghost" id="clearHistory">Sguassà tuttu</button><button class="btn" id="back">Ritornu</button></div></section>`; $('back').onclick=()=>renderApp(); $('exportCsv').onclick=exportCSV; $('clearHistory').onclick=()=>{ if(confirm("Seti sicuru di sguassà tuttu ?")){ localStorage.removeItem('history'); renderApp(); } }; bindMenuActions(); }
 
-function exportCSV(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const sep=';'; const headers=['Data','Ori','Funzioni','N° Emettori','Casata Emettori','Funzioni Emettori','Entità Emettori','N° Ricevitori','Casata Ricevitori','Funzioni Ricevitori','Entità Ricevitori','Missaghju']; const rows=list.map(x=>[x.date,x.time,x.role,x.em_num,x.em_name,x.em_func,x.em_ent,x.re_num,x.re_name,x.re_func,x.re_ent,(x.msg||'').replace(/\r?\n/g,' ')]); const csv=['\ufeff'+headers.join(sep)].concat(rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(sep))).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Storicu_Missaghji.csv'; document.body.appendChild(a); a.click(); a.remove(); }
+function exportCSV(){ const list=JSON.parse(localStorage.getItem('history')||'[]'); const sep=';'; const headers=['Data','Ori','Funzioni','N° Emettori','Casata Emettori','Funzioni Emettori','Entità Emettori','N° Ricevitori','Casata Ricevitori','Funzioni Ricevitori','Entità Ricevitori','Missaghju','Incidenti - Tippu Siegiu','Incidenti - Siegiu','Incidenti - Tippu Causa','Incidenti - Causa','Travaux urgent - Siegiu','Travaux urgent - Causa']; const rows=list.map(x=>[x.date,x.time,x.role,x.em_num,x.em_name,x.em_func,x.em_ent,x.re_num,x.re_name,x.re_func,x.re_ent,(x.msg||'').replace(/\r?\n/g,' '),x.inc_type_siege||'',x.inc_siege||'',x.inc_type_cause||'',x.inc_cause||'',x.trav_siege||'',x.trav_cause||'']); const csv=['\ufeff'+headers.join(sep)].concat(rows.map(r=>r.map(v=>'"'+String(v||'').replace(/"/g,'""')+'"').join(sep))).join('\n'); const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='Storicu_Missaghji.csv'; document.body.appendChild(a); a.click(); a.remove(); }
 
 document.addEventListener('DOMContentLoaded',()=>{ if($('startForm')) setupStart(); else setupMain(); });
