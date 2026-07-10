@@ -90,7 +90,7 @@ const travCauseOptions = {
 
 function setupStart(){const savedUser=localStorage.getItem('username');const savedEntity=localStorage.getItem('entity');if(savedUser&&savedEntity){location.replace('main.html');return;}const form=$('startForm');if(!form)return;const input=$('username');input.addEventListener('input',()=>{input.value=input.value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\-\s]/gu,'').toUpperCase();});form.addEventListener('submit',e=>{e.preventDefault();const name=(input.value||'').trim();if(!name||!lettersOnly(name))return alert('Le nom ne doit contenir que des lettres, espaces et tirets.');const ent=$('entity').value;localStorage.setItem('username',name.toUpperCase());localStorage.setItem('entity',ent);if(!localStorage.getItem('num'))localStorage.setItem('num','0');localStorage.setItem('version',VERSION);location.href='main.html';});}
 
-let currentRole='Émetteur'; let state=null;
+let currentRole='Émetteur'; let state=null; let showSiegeCause=false;
 function captureState(){ const get=id=>$(id)?$(id).value:''; state={ hour:get('hour'), min:get('min'), enNum:get('enNum'), enName:get('enName'), enFunc:get('enFunc'), enEnt:get('enEnt'), reNum:get('reNum'), reName:get('reName'), reFunc:get('reFunc'), reEnt:get('reEnt'), message:get('message'), incTypeSiege:get('incTypeSiege'), incSiege:get('incSiege'), incTypeCause:get('incTypeCause'), incCause:get('incCause'), travSiege:get('travSiege'), travCause:get('travCause') }; }
 function invertStateBetweenSides(){ if(!state) return; const s=state; [s.enNum,s.reNum]=[s.reNum,s.enNum]; [s.enName,s.reName]=[s.reName,s.enName]; [s.enFunc,s.reFunc]=[s.reFunc,s.enFunc]; [s.enEnt,s.reEnt]=[s.reEnt,s.enEnt]; }
 function applyUppercaseLive(ids){ ids.forEach(id=>{ const el=$(id); if(!el) return; el.addEventListener('input',()=>{ el.value=(el.value||'').toUpperCase(); }); }); }
@@ -99,7 +99,7 @@ function applyNumericOnly(ids){ ids.forEach(id=>{ const el=$(id); if(!el) return
 
 function toggleMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.toggle('hidden'); }
 function closeMenu(){ const o=$('menuOverlay'); if(!o) return; o.classList.add('hidden'); }
-function bindMenuActions(){ const install=()=>{if(window.deferredPrompt){window.deferredPrompt.prompt();window.deferredPrompt=null;return;}if(/iPhone|iPad|iPod/i.test(navigator.userAgent)){alert("Pà installà l'appiicazioni :\n\n1. Pichjeti nantu Sparta (Partager)\n2. Pichjeti nantu ⌄ Veda di più (en voir plus)\n3. Scigliti Nantu screnu d'accolta (Sur l'écran d'accueil)");return;}alert("L'installazioni ùn hè micca dispuniibili cù stu navigatori.");}; $('btnInstall')?.addEventListener('click',()=>{ closeMenu(); install(); }); $('btnHistory')?.addEventListener('click',()=>{ closeMenu(); showHistory(); }); $('btnChange')?.addEventListener('click',()=>{ closeMenu(); localStorage.removeItem('username'); localStorage.removeItem('entity'); location.href='index.html'; }); }
+function bindMenuActions(){ const install=()=>{if(window.deferredPrompt){window.deferredPrompt.prompt();window.deferredPrompt=null;return;}if(/iPhone|iPad|iPod/i.test(navigator.userAgent)){alert("Pà installà l'appiicazioni :\n\n1. Pichjeti nantu Sparta (Partager)\n2. Pichjeti nantu ⌄ Veda di più (en voir plus)\n3. Scigliti Nantu screnu d'accolta (Sur l'écran d'accueil)");return;}alert("L'installazioni ùn hè micca dispuniibili cù stu navigatori.");}; $('btnInstall')?.addEventListener('click',()=>{ closeMenu(); install(); }); $('btnHistory')?.addEventListener('click',()=>{ closeMenu(); captureState(); showHistory(); }); $('btnChange')?.addEventListener('click',()=>{ closeMenu(); localStorage.removeItem('username'); localStorage.removeItem('entity'); location.href='index.html'; }); }
 
 function setupMain(){ if(!$('topbar')) return; const user=localStorage.getItem('username')||''; const ent=localStorage.getItem('entity')||''; $('topbar').innerHTML=`<div><div class="app-title">CARNETTU DI MESSAGHJI<span class="version">${localStorage.getItem('version')||VERSION}</span></div><div class="meta">${user} (${ent})</div></div><div class="burger" id="burger">☰</div>`; $('burger').addEventListener('click',toggleMenu); $('overlayBackdrop')?.addEventListener('click',closeMenu); $('closeMenu')?.addEventListener('click',closeMenu); renderApp(); bindMenuActions(); }
 window.addEventListener('beforeinstallprompt',e=>{ e.preventDefault(); window.deferredPrompt=e; });
@@ -173,18 +173,27 @@ const incTypeSiegeOptions=Object.keys(incSiegeOptions).map(k=>`<option value="${
 const incTypeCauseOptions=Object.keys(incCausesBase).map(k=>`<option value="${k}">${k}</option>`).join('');
 const travSiegeSelectOptions=travSiegeList.map(k=>`<option value="${k}">${k}</option>`).join('');
 
-const incidentTravauxBlock = isBAO ? `
-<div class="row-func-ent" style="margin-top:10px">
-  <select id="incTypeSiege"><option value="">Incidenti - Tippu Siegiu</option>${incTypeSiegeOptions}</select>
-  <select id="incSiege"><option value="">Siegiu</option></select>
-</div>
-<div class="row-func-ent">
-  <select id="incTypeCause"><option value="">Incidenti - Tippu Causa</option>${incTypeCauseOptions}</select>
-  <select id="incCause"><option value="">Causa</option></select>
-</div>
-<div class="row-func-ent" style="margin-top:10px">
-  <select id="travSiege"><option value="">Travaux urgent - Siegiu</option>${travSiegeSelectOptions}</select>
-  <select id="travCause"><option value="">Causa</option></select>
+const toggleButton = isBAO ? `
+<div class="actions" style="margin-top:10px">
+  <button class="btn ghost" id="btnToggleSC">${showSiegeCause?'Piatta Siegiu/Causa':'Siegiu/Causa'}</button>
+</div>` : '';
+
+const incidentTravauxBlock = (isBAO && showSiegeCause) ? `
+<div class="block" style="margin-top:10px">
+  <h4>Incident :</h4>
+  <div class="row-func-ent">
+    <select id="incTypeSiege"><option value="">Tippu Siegiu</option>${incTypeSiegeOptions}</select>
+    <select id="incSiege"><option value="">Siegiu</option></select>
+  </div>
+  <div class="row-func-ent">
+    <select id="incTypeCause"><option value="">Tippu Causa</option>${incTypeCauseOptions}</select>
+    <select id="incCause"><option value="">Causa</option></select>
+  </div>
+  <h4 style="margin-top:10px">Travaux immèdiat :</h4>
+  <div class="row-func-ent">
+    <select id="travSiege"><option value="">Siegiu</option>${travSiegeSelectOptions}</select>
+    <select id="travCause"><option value="">Causa</option></select>
+  </div>
 </div>
 ` : '';
 
@@ -242,6 +251,7 @@ c.innerHTML=`
 <section class="card block">
   <h3>Missaghju</h3>
   <textarea id="message" placeholder="Scriva u missaghju">${s.message||''}</textarea>
+  ${toggleButton}
   ${incidentTravauxBlock}
   <div class="actions">
     <button class="btn primary" id="btnSave">Validà</button>
@@ -273,7 +283,9 @@ c.innerHTML=`
   applyUppercaseLive(['enName','reName']);
   applyNumericOnly(['hour','min','enNum','reNum']);
 
-  if(isBAO){ setupIncidentSelects(s); setupTravauxSelects(s); }
+  if(isBAO&&showSiegeCause){ setupIncidentSelects(s); setupTravauxSelects(s); }
+
+  $('btnToggleSC')?.addEventListener('click',e=>{ e.preventDefault(); captureState(); showSiegeCause=!showSiegeCause; renderApp(); });
 
   $('btnSave').onclick=e=>{ e.preventDefault(); saveMessage(); };
   $('btnReset').onclick=e=>{ e.preventDefault(); state=null; renderApp(); };
