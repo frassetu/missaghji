@@ -173,11 +173,6 @@ const incTypeSiegeOptions=Object.keys(incSiegeOptions).map(k=>`<option value="${
 const incTypeCauseOptions=Object.keys(incCausesBase).map(k=>`<option value="${k}">${k}</option>`).join('');
 const travSiegeSelectOptions=travSiegeList.map(k=>`<option value="${k}">${k}</option>`).join('');
 
-const toggleButton = isBAO ? `
-<div class="actions" style="margin-top:10px">
-  <button class="btn ghost" id="btnToggleSC">${showSiegeCause?'Piatta Siegiu/Causa':'Siegiu/Causa'}</button>
-</div>` : '';
-
 const incidentTravauxBlock = (isBAO && showSiegeCause) ? `
 <div class="block" style="margin-top:10px">
   <h4>Incident :</h4>
@@ -251,11 +246,11 @@ c.innerHTML=`
 <section class="card block">
   <h3>Missaghju</h3>
   <textarea id="message" placeholder="Scriva u missaghju">${s.message||''}</textarea>
-  ${toggleButton}
   ${incidentTravauxBlock}
   <div class="actions">
     <button class="btn primary" id="btnSave">Validà</button>
     <button class="btn ghost" id="btnReset">Rinizialisà</button>
+    ${isBAO?`<button class="btn ghost" id="btnToggleSC">${showSiegeCause?'Piatta Siegiu/Causa':'Siegiu/Causa'}</button>`:''}
   </div>
 </section>`;
 
