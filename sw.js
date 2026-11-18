@@ -1,4 +1,4 @@
-const CACHE_NAME = "missaghji-v4";
+const CACHE_NAME = "missaghji-v5";
 const urlsToCache = [
   "/",
   "/index.html",
@@ -6,7 +6,8 @@ const urlsToCache = [
   "/style.css",
   "/app.js",
   "/manifest.json",
-  "/offline.html"
+  "/offline.html",
+  "/icon-192.png"
 ];
 self.addEventListener("install", event => {
   event.waitUntil(

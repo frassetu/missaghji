@@ -125,3 +125,10 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
 .lang-switch .btn.active{background:var(--btn);color:var(--btnText);font-weight:700}
 .lang-block{margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}
 .card.narrow .lang-switch{margin:0 0 12px}
+
+/* ---------- Logo de l'appli ---------- */
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:36px;height:36px;border-radius:9px;display:block;flex:none}
+.title-row{display:flex;align-items:center;justify-content:center;gap:12px;margin:6px 0 12px}
+.title-row .title{margin:0;text-align:left}
+.logo-lg{width:56px;height:56px;border-radius:12px;display:block;flex:none}
