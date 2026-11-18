@@ -1,12 +1,12 @@
-const CACHE_NAME = "missaghji-v3";
+const CACHE_NAME = "missaghji-v4";
 const urlsToCache = [
-  "/missaghji/",
-  "/missaghji/index.html",
-  "/missaghji/main.html",
-  "/missaghji/style.css",
-  "/missaghji/app.js",
-  "/missaghji/manifest.json",
-  "/missaghji/offline.html"
+  "/",
+  "/index.html",
+  "/main.html",
+  "/style.css",
+  "/app.js",
+  "/manifest.json",
+  "/offline.html"
 ];
 self.addEventListener("install", event => {
   event.waitUntil(
@@ -17,7 +17,7 @@ self.addEventListener("install", event => {
 self.addEventListener("fetch", event => {
   event.respondWith(
     caches.match(event.request).then(response => {
-      return response || fetch(event.request).catch(() => caches.match("/missaghji/offline.html"));
+      return response || fetch(event.request).catch(() => caches.match("/offline.html"));
     })
   );
 });

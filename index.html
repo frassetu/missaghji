@@ -5,7 +5,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Carnettu di Missaghji</title>
-  <link rel="manifest" href="/missaghji/manifest.json">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="Missaghji">
   <script>console.log("MANIFEST TEST")</script>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -34,12 +36,12 @@
       <button type="submit" class="btn primary" style="margin-top:15px;" data-i18n="start_enter">Entra</button>
     </form>
   </main>
-  <script>window.APP_VERSION='v1.6.0';</script>
+  <script>window.APP_VERSION='v1.6.1';</script>
   <script src="app.js"></script>
   <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/missaghji/sw.js', { scope: '/missaghji/' })
+      navigator.serviceWorker.register('/sw.js', { scope: '/' })
         .then(reg => console.log('SW enregistré :', reg.scope))
         .catch(err => console.error('SW erreur :', err));
     });
