@@ -19,7 +19,7 @@ const I18N={
     err_name_start:'A casata devi cuntena soli letteri, spazii è linietti.',
     role:'Funzioni', role_sender:'Emettori', role_receiver:'Ricevitori',
     hour:'Ori', minute:'Minuti', refresh_now:'Attualizà',
-    sender:'Emettori', receiver:'Ricevitori',
+    me:'EIU', sender:'Emettori', receiver:'Ricevitori',
     message:'Missaghju', message_ph:'Scriva u missaghju',
     inc_title:'Incident :', trav_title:'Travaux immèdiat :',
     inc_type_siege:'Tippu Siegiu', siege:'Siegiu', inc_type_cause:'Tippu Causa', cause:'Causa',
@@ -43,7 +43,7 @@ const I18N={
     err_name_start:'Le nom ne doit contenir que des lettres, espaces et tirets.',
     role:'Rôle', role_sender:'Émetteur', role_receiver:'Récepteur',
     hour:'Heure', minute:'Minutes', refresh_now:'Actualiser',
-    sender:'Émetteur', receiver:'Récepteur',
+    me:'MOI', sender:'Émetteur', receiver:'Récepteur',
     message:'Message', message_ph:'Écrivez le message',
     inc_title:'Incident :', trav_title:'Travaux immédiats :',
     inc_type_siege:'Type de siège', siege:'Siège', inc_type_cause:'Type de cause', cause:'Cause',
@@ -285,7 +285,7 @@ c.innerHTML=`
 </section>
 
 <section class="card block">
-  <h3>${t('sender')} <span class="badge">${meSide==='sender'?'EIU':''}</span></h3>
+  <h3>${t('sender')} <span class="badge">${meSide==='sender'?t('me'):''}</span></h3>
   <div class="row-num-name">
     <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="enNum" min="1" max="999" value="${s.enNum||''}">
     ${meSide==='sender'?`<button class="num-btn" id="enGen">⟳</button>`:`<div></div>`}
@@ -298,7 +298,7 @@ c.innerHTML=`
 </section>
 
 <section class="card block">
-  <h3>${t('receiver')} <span class="badge">${meSide==='receiver'?'EIU':''}</span></h3>
+  <h3>${t('receiver')} <span class="badge">${meSide==='receiver'?t('me'):''}</span></h3>
   <div class="row-num-name">
     <input type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="3" id="reNum" min="1" max="999" value="${s.reNum||''}">
     ${meSide==='receiver'?`<button class="num-btn" id="reGen">⟳</button>`:`<div></div>`}
