@@ -21,13 +21,20 @@
     <div class="overlay-backdrop" id="overlayBackdrop"></div>
     <aside class="drawer" role="dialog" aria-label="Menu">
       <div class="drawer-header">
-        <strong>Uzzioni</strong>
-        <button class="btn ghost sm" id="closeMenu" title="Sarrà">✕</button>
+        <strong data-i18n="menu_title">Uzzioni</strong>
+        <button class="btn ghost sm" id="closeMenu" title="Sarrà" data-i18n-title="menu_close">✕</button>
       </div>
       <div class="drawer-content">
-        <button class="btn primary full" id="btnInstall">Installà</button>
-        <button class="btn full" id="btnHistory">Storicu</button>
-        <button class="btn ghost full" id="btnChange">Scambià l'entità</button>
+        <button class="btn primary full" id="btnInstall" data-i18n="menu_install">Installà</button>
+        <button class="btn full" id="btnHistory" data-i18n="menu_history">Storicu</button>
+        <button class="btn ghost full" id="btnChange" data-i18n="menu_change">Scambià l'entità</button>
+        <div class="lang-block">
+          <div class="small">Lingua · Langue</div>
+          <div class="lang-switch" role="group" aria-label="Lingua / Langue">
+            <button type="button" class="btn sm" data-lang="co">Corsu</button>
+            <button type="button" class="btn sm" data-lang="fr">Français</button>
+          </div>
+        </div>
       </div>
     </aside>
   </div>

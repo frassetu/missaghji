@@ -12,11 +12,15 @@
 <body class="screen">
   <main class="card narrow">
     <h1 class="title">CARNETTU DI MISSAGHJI</h1>
+    <div class="lang-switch" role="group" aria-label="Lingua / Langue">
+      <button type="button" class="btn sm" data-lang="co">Corsu</button>
+      <button type="button" class="btn sm" data-lang="fr">Français</button>
+    </div>
     <form id="startForm" novalidate>
-      <label for="username">A voscia casata</label>
-      <input id="username" name="username" type="text" autocomplete="off" autocapitalize="characters" placeholder="Asempiu : MURACCIOLI " pattern="^[A-Za-zÀ-ÖØ-öø-ÿ\-\s]+$" required />
+      <label for="username" data-i18n="start_name">A voscia casata</label>
+      <input id="username" name="username" type="text" autocomplete="off" autocapitalize="characters" placeholder="Asempiu : MURACCIOLI" data-i18n-placeholder="start_placeholder" pattern="^[A-Za-zÀ-ÖØ-öø-ÿ\-\s]+$" required />
       <small class="hint"></small>
-      <label for="entity">Entità</label>
+      <label for="entity" data-i18n="start_entity">Entità</label>
       <select id="entity" name="entity" required>
         <option value="BAO">BAO</option>
         <option value="BOBA">BOBA</option>
@@ -27,10 +31,10 @@
         <option value="BOPO">BOPO</option>
         <option value="BOVA">BOVA</option>
       </select>
-      <button type="submit" class="btn primary" style="margin-top:15px;">Entra</button>
+      <button type="submit" class="btn primary" style="margin-top:15px;" data-i18n="start_enter">Entra</button>
     </form>
   </main>
-  <script>window.APP_VERSION='v1.5.2';</script>
+  <script>window.APP_VERSION='v1.6.0';</script>
   <script src="app.js"></script>
   <script>
   if ('serviceWorker' in navigator) {
