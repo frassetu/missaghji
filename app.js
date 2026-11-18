@@ -14,6 +14,7 @@ const $=id=>document.getElementById(id);
 // ---- i18n : co (corsu) / fr (français) ----
 const I18N={
   co:{
+    theme_label:'Tema', theme_auto:'Auto', theme_light:'Chjaru', theme_dark:'Scuru',
     menu_title:'Uzzioni', menu_close:'Sarrà', menu_install:'Installà', menu_history:'Storicu', menu_change:"Scambià l'entità",
     start_name:'A voscia casata', start_placeholder:'Asempiu : MURACCIOLI', start_entity:'Entità', start_enter:'Entra',
     err_name_start:'A casata devi cuntena soli letteri, spazii è linietti.',
@@ -38,6 +39,7 @@ const I18N={
     csv_headers_sc:['Incidenti - Tippu Siegiu','Incidenti - Siegiu','Incidenti - Tippu Causa','Incidenti - Causa','Travaux urgent - Siegiu','Travaux urgent - Causa']
   },
   fr:{
+    theme_label:'Thème', theme_auto:'Auto', theme_light:'Clair', theme_dark:'Sombre',
     menu_title:'Options', menu_close:'Fermer', menu_install:'Installer', menu_history:'Historique', menu_change:"Changer d'entité",
     start_name:'Votre nom de famille', start_placeholder:'Exemple : MURACCIOLI', start_entity:'Entité', start_enter:'Entrer',
     err_name_start:'Le nom ne doit contenir que des lettres, espaces et tirets.',
@@ -75,6 +77,20 @@ function setLang(l){
   if(l!=='fr'&&l!=='co') return;
   localStorage.setItem('lang',l); applyI18n(); updateLangButtons();
   if($('content')){ if(currentView==='history'){ showHistory(); } else { captureState(); renderApp(); } }
+}
+// ---- thème : auto (système) / clair / sombre ----
+const getTheme=()=>{ try{ const v=localStorage.getItem('theme'); return (v==='light'||v==='dark')?v:'auto'; }catch(e){ return 'auto'; } };
+const systemDark=()=>!!(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches);
+function applyTheme(){
+  const m=getTheme(); const dark=(m==='dark')||(m==='auto'&&systemDark());
+  document.documentElement.dataset.theme=dark?'dark':'light';
+  const meta=document.querySelector('meta[name="theme-color"]'); if(meta) meta.content=dark?'#1B1B1D':'#F2F2F2';
+}
+function updateThemeButtons(){ const m=getTheme(); document.querySelectorAll('[data-theme-set]').forEach(b=>{ const on=b.dataset.themeSet===m; b.classList.toggle('active',on); b.setAttribute('aria-pressed',on?'true':'false'); }); }
+function setTheme(m){ if(!['auto','light','dark'].includes(m)) return; localStorage.setItem('theme',m); applyTheme(); updateThemeButtons(); }
+function bindThemeButtons(){
+  document.querySelectorAll('[data-theme-set]').forEach(b=>b.addEventListener('click',()=>setTheme(b.dataset.themeSet)));
+  if(window.matchMedia){ const mq=window.matchMedia('(prefers-color-scheme: dark)'); const f=()=>{ if(getTheme()==='auto') applyTheme(); }; if(mq.addEventListener) mq.addEventListener('change',f); else if(mq.addListener) mq.addListener(f); }
 }
 function bindLangButtons(){ document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang))); }
 const lettersOnly=str=>(/^[A-Za-zÀ-ÖØ-öø-ÿ\-\s]+$/u).test((str||'').trim());
@@ -384,4 +400,4 @@ function exportCSV(){
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=t('csv_filename'); document.body.appendChild(a); a.click(); a.remove();
 }
 
-document.addEventListener('DOMContentLoaded',()=>{ applyI18n(); bindLangButtons(); updateLangButtons(); if($('startForm')) setupStart(); else setupMain(); });
+document.addEventListener('DOMContentLoaded',()=>{ applyTheme(); bindThemeButtons(); updateThemeButtons(); applyI18n(); bindLangButtons(); updateLangButtons(); if($('startForm')) setupStart(); else setupMain(); });

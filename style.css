@@ -1,7 +1,13 @@
 
 :root{
   --bg:#FFFFFF; --text:#000000; --muted:#4d4d4d; --card:#F2F2F2;
-  --accent:#FF8A00; --btn:#FF8A00; --btnText:#000; --line:#e3e3e3;
+  --accent:#FF8A00; --btn:#FF8A00; --btnText:#000; --line:#e3e3e3; --field:#FFFFFF;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#0F0F10; --text:#F2F2F2; --muted:#A8A8A8; --card:#1B1B1D;
+  --line:#343437; --field:#262628;
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
@@ -28,7 +34,7 @@ label{display:block;margin:4px 0 4px;color:var(--text)}
 input,select,textarea{
   width:100%; max-width:100%;
   padding:10px; border-radius:10px; border:2px solid var(--line);
-  background:#fff; color:var(--text);
+  background:var(--field); color:var(--text);
 }
 
 textarea{
@@ -38,7 +44,7 @@ textarea{
 
 .btn{
   padding:10px 14px;border:2px solid var(--text);
-  border-radius:10px;background:#fff;color:var(--text);
+  border-radius:10px;background:var(--field);color:var(--text);
   font-weight:400;cursor:pointer
 }
 .btn:hover{box-shadow:0 2px 10px #0002}
@@ -51,7 +57,7 @@ textarea{
 .block h3{margin:0 0 8px;color:var(--text)}
 .actions{display:flex;gap:10px;flex-wrap:wrap}
 
-pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:1px solid var(--line)}
+pre{white-space:pre-wrap;background:var(--field);border-radius:10px;padding:12px;border:1px solid var(--line)}
 .badge{display:inline-block;padding:2px 8px;border-radius:999px;background:var(--accent);margin-left:8px;color:#000;font-weight:800}
 .small{font-size:12px;color:var(--muted)}
 .icon-btn{display:inline-flex;align-items:center;gap:6px}
@@ -105,7 +111,7 @@ pre{white-space:pre-wrap;background:#fff;border-radius:10px;padding:12px;border:
 .row-num-name .num-btn{
   display:inline-flex; align-items:center; justify-content:center;
   width:42px; height:40px; padding:0; font-size:1.4rem;
-  border:2px solid var(--text); border-radius:10px; background:#fff; cursor:pointer color:var(--text);
+  border:2px solid var(--text); border-radius:10px; background:var(--field); cursor:pointer; color:var(--text);
 }
 .row-num-name .num-btn:active{transform:scale(.95)}
 .row-num-name input[type="text"]{

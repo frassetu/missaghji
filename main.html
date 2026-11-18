@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Carnettu di Missaghji</title>
+  <script>try{var m=localStorage.getItem('theme');document.documentElement.dataset.theme=(m==='dark'||(m!=='light'&&matchMedia('(prefers-color-scheme: dark)').matches))?'dark':'light'}catch(e){}</script>
+  <meta name="theme-color" content="#F2F2F2">
   <link rel="manifest" href="/manifest.json">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-title" content="Missaghji">
@@ -35,6 +37,14 @@
           <div class="lang-switch" role="group" aria-label="Lingua / Langue">
             <button type="button" class="btn sm" data-lang="co">Corsu</button>
             <button type="button" class="btn sm" data-lang="fr">Français</button>
+          </div>
+        </div>
+        <div class="lang-block">
+          <div class="small" data-i18n="theme_label">Tema</div>
+          <div class="lang-switch" role="group" aria-label="Tema / Thème">
+            <button type="button" class="btn sm" data-theme-set="auto" data-i18n="theme_auto">Auto</button>
+            <button type="button" class="btn sm" data-theme-set="light" data-i18n="theme_light">Chjaru</button>
+            <button type="button" class="btn sm" data-theme-set="dark" data-i18n="theme_dark">Scuru</button>
           </div>
         </div>
       </div>

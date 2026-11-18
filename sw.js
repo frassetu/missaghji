@@ -1,4 +1,4 @@
-const CACHE_NAME = "missaghji-v5";
+const CACHE_NAME = "missaghji-v6";
 const urlsToCache = [
   "/",
   "/index.html",
